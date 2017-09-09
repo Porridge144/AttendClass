@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 
-public class lecturerLogIn extends AppCompatActivity {
+public class LecturerLogIn extends AppCompatActivity {
 
     EditText usernameText, passwordText;
     String username, password;
@@ -20,7 +20,7 @@ public class lecturerLogIn extends AppCompatActivity {
     }
 
     public void enterLecturerRegister(View view){
-        Intent i = new Intent(this, lecturerRegister.class);
+        Intent i = new Intent(this, LecturerRegister.class);
         startActivity(i);
     }
 

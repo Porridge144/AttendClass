@@ -19,7 +19,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 //1
-public class studentRegisterForClass extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class StudentRegisterForClass extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
     BluetoothAdapter bluetoothAdapter;
     ListView listView;
@@ -34,7 +34,7 @@ public class studentRegisterForClass extends AppCompatActivity implements Adapte
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(studentRegisterForClass.this);
+        listView.setOnItemClickListener(StudentRegisterForClass.this);
         //Register broadcast listener 4 to received successfully paired broadcast
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(broadcastReceiver4, filter);

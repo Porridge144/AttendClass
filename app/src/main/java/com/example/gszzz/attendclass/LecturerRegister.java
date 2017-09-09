@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class lecturerRegister extends AppCompatActivity {
+public class LecturerRegister extends AppCompatActivity {
 
     EditText nameText, usernameText, passwordText1, passwordText2;
     String name, username, password1, password2;

@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class lecturerMenu extends AppCompatActivity {
+public class LecturerMenu extends AppCompatActivity {
 
     BluetoothAdapter bluetoothAdapter;
     TextView timerText;
@@ -31,12 +31,12 @@ public class lecturerMenu extends AppCompatActivity {
     }
 
     public void enterAttendanceChecking(View view){
-        Intent i = new Intent(this, attendanceChecking.class);
+        Intent i = new Intent(this, AttendanceChecking.class);
         startActivity(i);
     }
 
     public void enterTimetableManagement(View view){
-        Intent i =  new Intent(this, timetableManagement.class);
+        Intent i =  new Intent(this, TimetableManagement.class);
         startActivity(i);
     }
 

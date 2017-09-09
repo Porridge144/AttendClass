@@ -18,23 +18,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".initial">
+        <activity android:name=".Initial">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".studentLogIn" />
-        <activity android:name=".lecturerLogIn" />
-        <activity android:name=".studentRegister" />
-        <activity android:name=".lecturerRegister" />
-        <activity android:name=".attendanceTaking" />
-        <activity android:name=".lecturerMenu" />
-        <activity android:name=".attendanceChecking" />
-        <activity android:name=".timetableManagement" />
-        <activity android:name=".nameList" />
-        <activity android:name=".studentRegisterForClass"/>
+        <activity android:name=".StudentLogIn" />
+        <activity android:name=".LecturerLogIn" />
+        <activity android:name=".StudentRegister" />
+        <activity android:name=".LecturerRegister" />
+        <activity android:name=".AttendanceTaking" />
+        <activity android:name=".LecturerMenu" />
+        <activity android:name=".AttendanceChecking" />
+        <activity android:name=".TimetableManagement" />
+        <activity android:name=".NameList" />
+        <activity android:name=".StudentRegisterForClass"/>
     </application>
 
 </manifest>

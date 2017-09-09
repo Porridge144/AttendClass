@@ -132,14 +132,14 @@ public class BackgroundTask1 extends AsyncTask<String, Void, String> {
         if (result.equals("Registration Succeeded...")) {
             Toast.makeText(ctx, result, Toast.LENGTH_LONG).show();
             //close activity
-            Intent i = new Intent(ctx, lecturerLogIn.class);
+            Intent i = new Intent(ctx, LecturerLogIn.class);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(i);
         }else {
             if (result.equals("Username already existed. Registration failed...")){
 
             } else if (!result.equals("Login Failed...Try Again")){
-                Intent i = new Intent(ctx, lecturerMenu.class);
+                Intent i = new Intent(ctx, LecturerMenu.class);
                 ctx.startActivity(i);
             }
             Toast.makeText(ctx, result, Toast.LENGTH_LONG).show();

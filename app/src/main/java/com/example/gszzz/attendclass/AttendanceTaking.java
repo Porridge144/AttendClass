@@ -5,17 +5,19 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-public class attendanceChecking extends AppCompatActivity {
+public class AttendanceTaking extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_attendance_checking);
+        setContentView(R.layout.activity_attendance_taking);
     }
 
-    public void enterNameList(View view){
-        Intent i = new Intent(this, nameList.class);
+    public void registerClassOnClicked(View view) {
+        Intent i = new Intent(this, StudentRegisterForClass.class);
         startActivity(i);
     }
 
+    public void attendOnClicked(View view) {
+    }
 }

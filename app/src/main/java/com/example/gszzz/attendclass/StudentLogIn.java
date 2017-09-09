@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-public class studentLogIn extends AppCompatActivity {
+public class StudentLogIn extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,12 +14,12 @@ public class studentLogIn extends AppCompatActivity {
     }
 
     public void enterStudentRegister(View view){
-        Intent i = new Intent(this, studentRegister.class);
+        Intent i = new Intent(this, StudentRegister.class);
         startActivity(i);
     }
 
     public void enterAttendanceTaking(View view){
-        Intent i = new Intent(this, attendanceTaking.class);
+        Intent i = new Intent(this, AttendanceTaking.class);
         startActivity(i);
     }
 }
