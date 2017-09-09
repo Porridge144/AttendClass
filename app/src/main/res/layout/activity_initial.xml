@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.gszzz.attendclass.initial">
+
+    <Button
+        android:id="@+id/StudentButton"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="215dp"
+        android:onClick="enterStudentInterface"
+        android:text="Student"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/LecturerButton"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/StudentButton"
+        android:layout_alignStart="@+id/StudentButton"
+        android:layout_below="@+id/StudentButton"
+        android:layout_marginTop="61dp"
+        android:onClick="enterLecturerInterface"
+        android:text="Lecturer"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/LecturerButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="90dp"
+        android:text="Log in as"
+        android:textSize="30sp" />
+
+</RelativeLayout>

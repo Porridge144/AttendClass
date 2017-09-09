@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.gszzz.attendclass.attendanceChecking">
+
+
+    <TextView
+        android:id="@+id/moduleInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="72dp"
+        android:textSize="25dp"
+        android:text="This is EE1001" />
+
+    <TextView
+        android:id="@+id/totalNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="78dp"
+        android:text="43/50"
+        android:textSize="35dp"
+        android:layout_below="@+id/moduleInfo"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/furtherInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="see more"
+        android:textColorHighlight="@android:color/holo_red_dark"
+        android:textSize="20dp"
+        android:layout_centerVertical="true"
+        android:onClick="enterNameList"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
