@@ -9,12 +9,12 @@
         android:id="@+id/usernameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="78dp"
+        android:layout_marginTop="51dp"
         android:ems="10"
         android:hint="Username"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <EditText
         android:id="@+id/nameText"
@@ -52,16 +52,25 @@
         android:hint="Password(confirm)"
         android:inputType="textPassword" />
 
+    <EditText
+        android:id="@+id/verificationCodeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/lecturerRegisterButton"
+        android:layout_below="@+id/passwordText2"
+        android:layout_marginTop="25dp"
+        android:ems="10"
+        android:hint="Verification Code"
+        android:inputType="textPassword" />
+
     <Button
         android:id="@+id/lecturerRegisterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/passwordText2"
-        android:layout_alignLeft="@+id/passwordText2"
-        android:layout_alignRight="@+id/passwordText2"
-        android:layout_alignStart="@+id/passwordText2"
-        android:layout_below="@+id/passwordText2"
-        android:layout_marginTop="30dp"
         android:onClick="registerOnClicked"
-        android:text="Register" />
+        android:text="Register"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/passwordText2"
+        android:layout_marginBottom="64dp"
+        android:layout_alignEnd="@+id/passwordText2" />
 </RelativeLayout>

@@ -30,24 +30,4 @@
         android:text="Timetable Management"
         android:onClick="enterTimetableManagement"/>
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="47dp"
-        android:onClick="bluetoothDiscoverableOnClicked"
-        android:text="Discoverable"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/timerText"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="18dp"
-        android:textAlignment="center"
-        android:textSize="14sp" />
 </RelativeLayout>

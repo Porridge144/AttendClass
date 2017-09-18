@@ -29,30 +29,16 @@
         android:layout_alignLeft="@+id/usernameText"
         android:layout_alignStart="@+id/usernameText" />
 
-    <EditText
-        android:id="@+id/verifyText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/passwordText"
-        android:layout_alignStart="@+id/passwordText"
-        android:layout_below="@+id/passwordText"
-        android:layout_marginTop="23dp"
-        android:ems="10"
-        android:hint="Verification Code"
-        android:inputType="textPersonName" />
-
     <Button
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="30dp"
         android:text="Log in"
+        android:onClick="enterLecturerMenu"
         android:layout_below="@+id/passwordText"
-        android:layout_alignLeft="@+id/passwordText"
         android:layout_alignStart="@+id/passwordText"
-        android:layout_alignRight="@+id/passwordText"
-        android:layout_alignEnd="@+id/passwordText"
-        android:onClick="enterLecturerMenu" />
+        android:layout_alignEnd="@+id/passwordText" />
 
     <Button
         android:id="@+id/registerButton"

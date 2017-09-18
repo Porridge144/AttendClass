@@ -5,16 +5,16 @@
     android:layout_height="match_parent"
     tools:context="com.example.gszzz.attendclass.AttendanceTaking">
 
-    <Button
-        android:id="@+id/button2"
+    <Switch
+        android:id="@+id/startAdvertiseSwitch"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="47dp"
-        android:onClick="registerClassOnClicked"
-        android:text="Register For the Class"
-        android:textSize="12sp" />
+        android:layout_height="wrap_content"
+        android:allowUndo="false"
+        android:onClick="startAdvertiseOnClicked"
+        android:text="Start Advertise"
+        android:layout_below="@+id/attendButton"
+        android:layout_alignEnd="@+id/moduleLocation"
+        android:layout_marginTop="57dp" />
 
     <TextView
         android:id="@+id/defaultText"
@@ -23,7 +23,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="78dp"
-        android:textSize="23dp"
+        android:textSize="23sp"
         android:text="Currently in module" />
 
     <TextView
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="39dp"
         android:text="EE1001"
-        android:textSize="30dp"
+        android:textSize="30sp"
         android:layout_below="@+id/defaultText"
         android:layout_centerHorizontal="true" />
 
@@ -43,7 +43,7 @@
         android:layout_below="@+id/moduleInfo"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
-        android:textSize="27dp"
+        android:textSize="27sp"
         android:text="At E5-04-21" />
 
     <Button
@@ -51,12 +51,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/defaultText"
-        android:layout_alignLeft="@+id/defaultText"
-        android:layout_alignRight="@+id/defaultText"
         android:layout_alignStart="@+id/defaultText"
         android:layout_below="@+id/moduleLocation"
         android:layout_marginTop="55dp"
         android:onClick="attendOnClicked"
         android:text="Attend"
-        android:textSize="23dp" />
+        android:textSize="23sp" />
 </RelativeLayout>

@@ -36,10 +36,10 @@ public class BackgroundTask1 extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
 //------------------------------Change Server IP HERE---------------------------------------
-//        String regUrl = "http://121.7.122.74:8081/attendance/register.php";
-//        String loginUrl = "http://121.7.122.74:8081/attendance/login.php";
-        String regUrl = "http://172.17.0.145:8081/attendance/register.php";
-        String loginUrl = "http://172.17.0.145:8081/attendance/login.php";
+        String regUrl = "http://121.7.122.74:8081/attendance/register.php";
+        String loginUrl = "http://121.7.122.74:8081/attendance/login.php";
+//        String regUrl = "http://172.17.0.145:8081/attendance/register.php";
+//        String loginUrl = "http://172.17.0.145:8081/attendance/login.php";
 //------------------------------------------------------------------------------------------
         String method = params[0];
         if (method.equals("register")) {
