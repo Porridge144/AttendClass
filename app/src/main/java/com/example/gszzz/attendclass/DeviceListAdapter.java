@@ -1,6 +1,6 @@
 package com.example.gszzz.attendclass;
 
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -11,16 +11,19 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
+public class DeviceListAdapter extends ArrayAdapter<ScanResult> {
 
     private LayoutInflater mLayoutInflater;
-    private ArrayList<BluetoothDevice> mDevices;
+    private ArrayList<ScanResult> results;
     private int mViewResourceID;
 
-    public DeviceListAdapter(@NonNull Context context, @LayoutRes int tvResourceID, @NonNull ArrayList<BluetoothDevice> devices) {
-        super(context, tvResourceID, devices);
-        this.mDevices = devices;
+    public DeviceListAdapter(@NonNull Context context, @LayoutRes int tvResourceID, @NonNull ArrayList<ScanResult> results) {
+        super(context, tvResourceID, results);
+        this.results = results;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mViewResourceID = tvResourceID;
     }
@@ -30,18 +33,37 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
             convertView = mLayoutInflater.inflate(mViewResourceID, null);
         }
 
-        BluetoothDevice device = mDevices.get(position);
+        ScanResult result = results.get(position);
 
-        if (device != null) {
+        if (result != null) {
             TextView deviceName = (TextView) convertView.findViewById(R.id.tvDeviceName);
             TextView deviceAddress = (TextView) convertView.findViewById(R.id.tvDeviceAddress);
+            TextView deviceData = (TextView) convertView.findViewById(R.id.tvDeviceData);
 
             if (deviceName != null) {
-                deviceName.setText(device.getName());
+                if (result.getDevice().getName().equals("")) {
+                    deviceName.setText(R.string.no_device_name);
+                } else {
+                    deviceName.setText(result.getDevice().getName());
+                }
             }
             if (deviceAddress != null) {
-                deviceAddress.setText(device.getAddress());
+                deviceAddress.setText(result.getDevice().getAddress());
             }
+            if (deviceData != null) {
+                try {
+                    String str = "";
+                    byte[] bytes = new byte[16];
+                    for(Map.Entry m:result.getScanRecord().getServiceData().entrySet()){
+                        bytes = (byte[]) m.getValue();
+                        String str1 = new String(bytes);
+                        str += str1;
+                    }
+                    deviceData.setText(str);
+                } catch (Exception ignored) {
+                }
+            }
+
         }
 
 

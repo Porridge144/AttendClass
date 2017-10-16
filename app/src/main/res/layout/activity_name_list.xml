@@ -16,19 +16,13 @@
         android:textSize="25dp"
         android:text="Name List" />
 
-    <ScrollView
-        android:id="@+id/scrollView"
+    <ListView
+        android:id="@+id/devicesListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_below="@+id/nameList"
-        android:layout_marginTop="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+        android:layout_marginTop="32dp"
+        android:layout_margin="20dp"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

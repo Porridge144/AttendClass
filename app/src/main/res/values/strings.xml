@@ -15,4 +15,5 @@
     <string name="scanning_already_started">Scanning already started...</string>
     <string name="start_error_registration_failed">Application registration failed...</string>
     <string name="scanning_time_out">Scanning timed out...</string>
+    <string name="no_device_name">No device name</string>
 </resources>

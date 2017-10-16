@@ -130,7 +130,7 @@ public class StudentRegisterForClass extends AppCompatActivity implements Adapte
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 mBTDevices.add(device);
                 Toast.makeText(getApplicationContext(), "Device Found: " + device.getName() + "@" + device.getAddress(), Toast.LENGTH_SHORT).show();
-                deviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
+//                deviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
                 listView.setAdapter(deviceListAdapter);
 
             }

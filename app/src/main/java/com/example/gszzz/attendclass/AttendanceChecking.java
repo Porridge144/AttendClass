@@ -4,19 +4,27 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class AttendanceChecking extends AppCompatActivity {
 
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
+    private TextView totalNumTextView;
+    private ArrayList<ScanResult> scanResults;
 
 
     @Override
@@ -24,6 +32,10 @@ public class AttendanceChecking extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_checking);
 
+        scanResults = new ArrayList<>();
+        totalNumTextView = (TextView) findViewById(R.id.totalNumTextView);
+        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+        registerReceiver(scanResultsReceiver, filter);
 
         scanningFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -72,7 +84,7 @@ public class AttendanceChecking extends AppCompatActivity {
                     // Are Bluetooth Advertisements supported on this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
 //                        // Everything is supported and enabled
-//                        checkBTPermissions();
+                        checkBTPermissions();
                         //Start service
                         startScanning();
                     } else {
@@ -110,7 +122,7 @@ public class AttendanceChecking extends AppCompatActivity {
                     // this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
 //                        // Everything is supported and enabled
-//                        checkBTPermissions();
+                        checkBTPermissions();
                         //Start service
                         startScanning();
 
@@ -136,6 +148,7 @@ public class AttendanceChecking extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(scanResultsReceiver);
         Toast.makeText(getApplicationContext(), "Scanning activity get destroyed....", Toast.LENGTH_SHORT).show();
         if (ScannerService.running) {
             stopScanning();
@@ -210,4 +223,24 @@ public class AttendanceChecking extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "SDK version < LOLIPOP. No need permission check.", Toast.LENGTH_LONG).show();
         }
     }
+
+    private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ScannerService.NEW_DEVICE_FOUND)) {
+                try {
+//                    String abc = intent.getStringExtra("ABC");
+//                    Toast.makeText(getApplicationContext(), abc, Toast.LENGTH_SHORT).show();
+                    scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
+                    Toast.makeText(getApplicationContext(), scanResults.get(0).getDevice().getName(), Toast.LENGTH_SHORT).show();
+                    String totalNumber = " " + scanResults.size() + " ";
+                    totalNumTextView.setText(totalNumber);
+                } catch (Resources.NotFoundException e) {
+                    Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "AttendanceChecking: " + e.toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 }

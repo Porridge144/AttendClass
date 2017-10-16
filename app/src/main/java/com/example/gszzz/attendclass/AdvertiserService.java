@@ -1,6 +1,5 @@
 package com.example.gszzz.attendclass;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -14,8 +13,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.support.annotation.IntDef;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -49,7 +46,6 @@ public class AdvertiserService extends Service {
     private long TIMEOUT = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES);
 
     @Override
-
     public void onCreate() {
         running = true;
         initialize();
@@ -101,6 +97,9 @@ public class AdvertiserService extends Service {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(true);
+        String advertisingData = "good";
+        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
+
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
         //String failureData = "asdghkajsghalkxcjhfa;sghtalksjcfhalskfjhasldkjfhdskf";
@@ -115,7 +114,7 @@ public class AdvertiserService extends Service {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
         settingsBuilder.setTimeout(0);
         return settingsBuilder.build();
     }

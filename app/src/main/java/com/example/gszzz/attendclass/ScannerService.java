@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -34,10 +35,13 @@ public class ScannerService extends Service {
     public static boolean running = false;
     public ArrayList<ScanResult> scanResults;
 
+    public static final String NEW_DEVICE_FOUND = "ble_new_device_found";
     public static final String SCANNING_FAILED =
             "com.example.gszzz.attendclass.scanning_failed";
     public static final String SCANNING_FAILED_EXTRA_CODE = "failureCode";
     public static final int SCANNING_TIMED_OUT = 6;
+    public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
+
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
@@ -52,6 +56,7 @@ public class ScannerService extends Service {
     @Override
     public void onCreate() {
         running = true;
+        scanResults = new ArrayList<>();
         initialize();
         startScanning();
         super.onCreate();
@@ -60,16 +65,16 @@ public class ScannerService extends Service {
     private void startScanning() {
         goForeground();
         if (mScanCallback == null) {
-            Toast.makeText(getApplicationContext(), "Starting scanning ", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Starting scanning ", Toast.LENGTH_SHORT).show();
             //set timeout for scanning
             setTimeout();
             //start a new scan
             mScanCallback = new SampleScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
 
-            Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), R.string.scanning_already_started, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.scanning_already_started, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -96,8 +101,13 @@ public class ScannerService extends Service {
             for (ScanResult result : results) {
                 addScanResult(result);
             }
-            //TODO: For Testing purpose
-            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+
+            Intent newDeviceFoundIntent = new Intent();
+            newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
+            newDeviceFoundIntent.putParcelableArrayListExtra(PARCELABLE_SCANRESULTS, scanResults);
+            sendBroadcast(newDeviceFoundIntent);
+
         }
 
         @Override
@@ -105,14 +115,19 @@ public class ScannerService extends Service {
             super.onScanResult(callbackType, result);
             //add to the scanResults list
             addScanResult(result);
-            //TODO: For Testing purpose
-            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_LONG).show();
+
+//            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+
+            Intent newDeviceFoundIntent = new Intent();
+            newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
+            newDeviceFoundIntent.putParcelableArrayListExtra(PARCELABLE_SCANRESULTS, scanResults);
+            sendBroadcast(newDeviceFoundIntent);
         }
 
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            Toast.makeText(getApplicationContext(), "Scan failed with error: " + errorCode, Toast.LENGTH_LONG)
+            Toast.makeText(getApplicationContext(), "Scan failed with error: " + errorCode, Toast.LENGTH_SHORT)
                     .show();
         }
     }
@@ -164,7 +179,7 @@ public class ScannerService extends Service {
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER);
+        builder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
         return builder.build();
     }
 
@@ -187,7 +202,7 @@ public class ScannerService extends Service {
     }
 
     private void stopScanning() {
-        Toast.makeText(getApplicationContext(), "Stopping scanning...", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Stopping scanning...", Toast.LENGTH_SHORT).show();
 
         //Stop the scan, wipe the callback.
         mBluetoothLeScanner.stopScan(mScanCallback);
@@ -205,7 +220,7 @@ public class ScannerService extends Service {
                 stopSelf();
             }
         };
-        mHandler.postDelayed(timeoutRunnable, 10000);
+        mHandler.postDelayed(timeoutRunnable, TIMEOUT);
     }
 
     /**
