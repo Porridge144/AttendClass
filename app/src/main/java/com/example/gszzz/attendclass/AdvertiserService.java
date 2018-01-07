@@ -97,9 +97,15 @@ public class AdvertiserService extends Service {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(true);
-        String advertisingData = "good";
-        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
 
+        // get the received data and separate;
+        //String[] temp = receivedData.split("\\s") split by space
+        // String dataLabel = temp[0]
+        // String dataID = temp[1]
+        // write them into above variables
+        String advertisingData = "1 myID"; // dataLabel + " " + dataID
+        // data consists of label no. and student name/id
+        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
         //String failureData = "asdghkajsghalkxcjhfa;sghtalksjcfhalskfjhasldkjfhdskf";
@@ -173,6 +179,7 @@ public class AdvertiserService extends Service {
         }
         String message = intentData.getString("message");
         //TODO : Use the message
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -231,4 +238,14 @@ public class AdvertiserService extends Service {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+//    /**
+//     * When app goes off screen, unregister the Advertising failure Receiver to stop memory leaks.
+//     * (and because the app doesn't care if Advertising fails while the UI isn't active)
+//     */
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        getActivity().unregisterReceiver(advertisingFailureReceiver);
+//    }
 }

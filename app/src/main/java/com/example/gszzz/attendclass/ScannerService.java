@@ -101,13 +101,12 @@ public class ScannerService extends Service {
             for (ScanResult result : results) {
                 addScanResult(result);
             }
-//            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
 
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
             newDeviceFoundIntent.putParcelableArrayListExtra(PARCELABLE_SCANRESULTS, scanResults);
             sendBroadcast(newDeviceFoundIntent);
-
         }
 
         @Override
@@ -116,7 +115,7 @@ public class ScannerService extends Service {
             //add to the scanResults list
             addScanResult(result);
 
-//            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
 
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);

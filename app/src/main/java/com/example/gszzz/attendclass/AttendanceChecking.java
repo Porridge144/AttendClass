@@ -83,7 +83,7 @@ public class AttendanceChecking extends AppCompatActivity {
 
                     // Are Bluetooth Advertisements supported on this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
-//                        // Everything is supported and enabled
+                        // Everything is supported and enabled
                         checkBTPermissions();
                         //Start service
                         startScanning();
@@ -118,10 +118,9 @@ public class AttendanceChecking extends AppCompatActivity {
 
                 if (resultCode == RESULT_OK) {
 
-                    // Bluetooth is now Enabled, are Bluetooth Advertisements supported on
-                    // this device?
+                    // Bluetooth is now Enabled, are Bluetooth Advertisements supported on this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
-//                        // Everything is supported and enabled
+                        // Everything is supported and enabled
                         checkBTPermissions();
                         //Start service
                         startScanning();
