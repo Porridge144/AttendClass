@@ -18,7 +18,7 @@
         android:inputType="textPersonName" />
 
     <EditText
-        android:id="@+id/nameText"
+        android:id="@+id/passwordText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/usernameText"
@@ -33,11 +33,11 @@
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/nameText"
-        android:layout_alignLeft="@+id/nameText"
-        android:layout_alignRight="@+id/nameText"
-        android:layout_alignStart="@+id/nameText"
-        android:layout_below="@+id/nameText"
+        android:layout_alignEnd="@+id/passwordText"
+        android:layout_alignLeft="@+id/passwordText"
+        android:layout_alignRight="@+id/passwordText"
+        android:layout_alignStart="@+id/passwordText"
+        android:layout_below="@+id/passwordText"
         android:layout_marginTop="44dp"
         android:onClick="enterAttendanceTaking"
         android:text="Log in" />

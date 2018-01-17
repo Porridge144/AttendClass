@@ -15,7 +15,7 @@ public class LecturerRegister extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lecturer_register);
-        nameText = (EditText) findViewById(R.id.nameText);
+        nameText = (EditText) findViewById(R.id.passwordText);
         usernameText = (EditText) findViewById(R.id.usernameText);
         passwordText1 = (EditText) findViewById(R.id.passwordText);
         passwordText2 = (EditText) findViewById(R.id.passwordText2);

@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NameList extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
@@ -54,6 +55,8 @@ public class NameList extends AppCompatActivity implements AdapterView.OnItemCli
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         String deviceName = scanResults.get(i).getDevice().getName();
-        Toast.makeText(getApplicationContext(), "You have clicked device: " + deviceName, Toast.LENGTH_SHORT).show();
+        List deviceUuid = scanResults.get(i).getScanRecord().getServiceUuids();
+        String deviceMessage = scanResults.get(i).getScanRecord().getServiceData().get(deviceUuid).toString();
+        Toast.makeText(getApplicationContext(), "You have clicked device: " + deviceMessage, Toast.LENGTH_SHORT).show();
     }
 }

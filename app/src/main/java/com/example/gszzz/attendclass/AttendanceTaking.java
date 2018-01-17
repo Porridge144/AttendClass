@@ -1,24 +1,40 @@
 package com.example.gszzz.attendclass;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.AdvertiseCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ParcelUuid;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class AttendanceTaking extends AppCompatActivity {
 
     private BroadcastReceiver advertisingFailureReceiver;
+    private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private Switch startAdvertiseSwitch;
+    private ArrayList<ScanResult> scanResults;
+    private int mlabelData;
 
+    public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +73,9 @@ public class AttendanceTaking extends AppCompatActivity {
             }
         }
 
+        startAdvertiseSwitch = (Switch)findViewById(R.id.startAdvertiseSwitch);
 
-        startAdvertiseSwitch = (Switch) findViewById(R.id.startAdvertiseSwitch);
-
-        advertisingFailureReceiver = new BroadcastReceiver(){
+        advertisingFailureReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int errorCode = intent.getIntExtra(AdvertiserService.ADVERTISING_FAILED_EXTRA_CODE, -1);
@@ -96,7 +111,6 @@ public class AttendanceTaking extends AppCompatActivity {
         };
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -127,8 +141,97 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
-    public void attendOnClicked(View view) {
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void relayOnClicked(View view) {
+
+        scanResults = new ArrayList<>();
+        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+        registerReceiver(scanResultsReceiver, filter);
+
+//        scanningFailureReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                int errorCode = intent.getIntExtra(ScannerService.SCANNING_FAILED_EXTRA_CODE, -1);
+//
+//                String errorMessage = getString(R.string.start_error_prefix);
+//                switch (errorCode) {
+//                    case ScanCallback.SCAN_FAILED_ALREADY_STARTED:
+//                        errorMessage += " " + getString(R.string.start_error_already_started);
+//                        break;
+//                    case ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED:
+//                        errorMessage += " " + getString(R.string.start_error_unsupported);
+//                        break;
+//                    case ScanCallback.SCAN_FAILED_INTERNAL_ERROR:
+//                        errorMessage += " " + getString(R.string.start_error_internal);
+//                        break;
+//                    case ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
+//                        errorMessage += " " + getString(R.string.start_error_registration_failed);
+//                        break;
+//                    case ScannerService.SCANNING_TIMED_OUT:
+//                        errorMessage = " " + getString(R.string.scanning_time_out);
+//                        break;
+//                    default:
+//                        errorMessage += " " + getString(R.string.start_error_unknown);
+//                }
+//
+//                Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+//            }
+//        };
+
+        startScanning();
+
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void checkBTPermissions() {
+        int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
+        permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
+        if (permissionCheck != 0) {
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
+        } else {
+            Toast.makeText(getApplicationContext(), "SDK version < LOLIPOP. No need permission check.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ScannerService.NEW_DEVICE_FOUND)) {
+                try {
+                    scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
+
+                    List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
+                    String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
+//                    String receivedData = scanResults.get(0).getDevice().getName();
+                    StudentLogIn.globalRelayUsername = receivedData;
+
+                    startAdvertising(receivedData);
+//
+                    context.unregisterReceiver(scanResultsReceiver);
+                    Toast.makeText(getApplicationContext(), receivedData, Toast.LENGTH_SHORT).show();
+                    stopScanning();
+                    //String[] temp = receivedData.split("\\s");
+                    //int labelData = Integer.parseInt(temp[0]);
+                    //String userID = temp[1];
+
+//                    if (labelData > mlabelData) {
+//                        // need to relay
+//                        Intent newRelayIntent = new Intent();
+//                        newRelayIntent.setAction(RELAY_NEEDED);
+//                        newRelayIntent.putExtra("RelayData", receivedData);
+//                        sendBroadcast(newRelayIntent);
+//                    }
+
+                    // String totalNumber = " " + scanResults.size() + " ";
+                    // totalNumTextView.setText(totalNumber);
+                } catch (Resources.NotFoundException e) {
+                    Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "AttendanceChecking: " + e.toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 
     /**
      * When app comes on screen, check if BLE Advertisements are running, set switch accordingly,
@@ -146,6 +249,7 @@ public class AttendanceTaking extends AppCompatActivity {
 
         IntentFilter intentFilter = new IntentFilter(AdvertiserService.ADVERTISING_FAILED);
         registerReceiver(advertisingFailureReceiver, intentFilter);
+        registerReceiver(scanningFailureReceiver, intentFilter);
     }
 
     /**
@@ -156,8 +260,8 @@ public class AttendanceTaking extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         unregisterReceiver(advertisingFailureReceiver);
+        unregisterReceiver(scanningFailureReceiver);
     }
-
 
     public void startAdvertiseOnClicked(View view) {
         //Is the toggle on?
@@ -170,25 +274,54 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
+    private void startAdvertising(String receivedData) {
+        Context c = getApplicationContext();
+        c.startService(getAdvertiseServiceIntent(c, receivedData));
+    }
+
     private void startAdvertising() {
         Context c = getApplicationContext();
-        c.startService(getServiceIntent(c));
+        c.startService(getAdvertiseServiceIntent(c));
     }
 
     private void stopAdvertising() {
         Context c = getApplicationContext();
-        c.stopService(getServiceIntent(c));
+        c.stopService(getAdvertiseServiceIntent(c));
         startAdvertiseSwitch.setChecked(false);
+    }
+
+    private void startScanning() {
+        Context c = getApplicationContext();
+        c.startService(getScannerServiceIntent(c));
+    }
+
+    private void stopScanning() {
+        Context c = getApplicationContext();
+        c.stopService(getScannerServiceIntent(c));
     }
 
     /**
      * Returns Intent addressed to the {@code AdvertiserService} class.
      */
-    private static Intent getServiceIntent(Context c) {
+    private static Intent getAdvertiseServiceIntent(Context c, String receivedData) {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
-        intent.putExtra("message", "Put message here!!");
+        //intent.putExtra("message", "Put message here!!");
+        intent.putExtra("RelayData", receivedData);
         return intent;
     }
 
+    private static Intent getAdvertiseServiceIntent(Context c) {
+        Intent intent = new Intent(c, AdvertiserService.class);
+        //TODO: Use this to send info to Advertise Service
+        //intent.putExtra("message", "Put message here!!");
+        return intent;
+    }
+
+    private static Intent getScannerServiceIntent(Context c) {
+        Intent intent = new Intent(c, ScannerService.class);
+        //TODO: Use this to send info to Scanner Service
+//        intent.putExtra("message", "Put message here!!");
+        return intent;
+    }
 }

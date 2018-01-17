@@ -182,7 +182,6 @@ public class ScannerService extends Service {
         return builder.build();
     }
 
-
     /**
      * Move service to the foreground, to avoid execution limits on background processes.
      *

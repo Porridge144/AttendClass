@@ -8,14 +8,17 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class AdvertiserService extends Service {
@@ -39,6 +42,7 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
+    private String advertisingData = StudentLogIn.globalUsername;
 
     /**
      * Length of time to allow advertising before automatically shutting off. (5 minutes)
@@ -49,6 +53,9 @@ public class AdvertiserService extends Service {
     public void onCreate() {
         running = true;
         initialize();
+        if(StudentLogIn.globalRelayUsername != ""){
+            advertisingData = StudentLogIn.globalRelayUsername;
+        }
         startAdvertising();
         setTimeout();
         super.onCreate();
@@ -98,12 +105,6 @@ public class AdvertiserService extends Service {
         dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(true);
 
-        // get the received data and separate;
-        //String[] temp = receivedData.split("\\s") split by space
-        // String dataLabel = temp[0]
-        // String dataID = temp[1]
-        // write them into above variables
-        String advertisingData = "1 myID"; // dataLabel + " " + dataID
         // data consists of label no. and student name/id
         dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
 
@@ -127,7 +128,7 @@ public class AdvertiserService extends Service {
 
     /**
      * Move service to the foreground, to avoid execution limits on background processes.
-     *
+     * <p>
      * Callers should call stopForeground(true) when background work is complete.
      */
     private void goForeground() {
@@ -171,23 +172,26 @@ public class AdvertiserService extends Service {
 
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle intentData = intent.getExtras();
-        if (intentData == null) {
-            return super.onStartCommand(intent, flags, startId);
-        }
-        String message = intentData.getString("message");
-        //TODO : Use the message
-
-        return super.onStartCommand(intent, flags, startId);
-    }
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//        running = true;
+//        initialize();
+//        Bundle intentData = intent.getExtras();
+//        if (intentData == null) {
+//            return super.onStartCommand(intent, flags, startId);
+//        }
+//        String message = intentData.getString("RelayData");
+//        advertisingData = message;
+//        startAdvertising();
+//        setTimeout();
+//        return super.onStartCommand(intent, flags, startId);
+//    }
 
     /**
      * Starts a delayed Runnable that will cause the BLE Advertising to timeout and stop after a
      * set amount of time.
      */
-    private void setTimeout(){
+    private void setTimeout() {
         mHandler = new Handler();
         timeoutRunnable = new Runnable() {
             @Override
@@ -203,7 +207,7 @@ public class AdvertiserService extends Service {
      * Builds and sends a broadcast intent indicating Advertising has failed. Includes the error
      * code as an extra. This is intended to be picked up by the {@code AdvertiserFragment}.
      */
-    private void sendFailureIntent(int errorCode){
+    private void sendFailureIntent(int errorCode) {
         Intent failureIntent = new Intent();
         failureIntent.setAction(ADVERTISING_FAILED);
         failureIntent.putExtra(ADVERTISING_FAILED_EXTRA_CODE, errorCode);

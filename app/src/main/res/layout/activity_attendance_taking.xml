@@ -12,7 +12,7 @@
         android:allowUndo="false"
         android:onClick="startAdvertiseOnClicked"
         android:text="Start Advertise"
-        android:layout_below="@+id/attendButton"
+        android:layout_below="@+id/relayButton"
         android:layout_alignEnd="@+id/moduleLocation"
         android:layout_marginTop="57dp" />
 
@@ -47,14 +47,14 @@
         android:text="At E5-04-21" />
 
     <Button
-        android:id="@+id/attendButton"
+        android:id="@+id/relayButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/defaultText"
         android:layout_alignStart="@+id/defaultText"
         android:layout_below="@+id/moduleLocation"
         android:layout_marginTop="55dp"
-        android:onClick="attendOnClicked"
-        android:text="Attend"
+        android:onClick="relayOnClicked"
+        android:text="Scan for Relay"
         android:textSize="23sp" />
 </RelativeLayout>

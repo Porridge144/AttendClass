@@ -11,12 +11,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.ParcelUuid;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class AttendanceChecking extends AppCompatActivity {
@@ -25,7 +27,9 @@ public class AttendanceChecking extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
     private ArrayList<ScanResult> scanResults;
+    private int mlabelData = 0;
 
+    public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +68,6 @@ public class AttendanceChecking extends AppCompatActivity {
                 }
 
                 Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
-
-
             }
         };
 
@@ -106,8 +108,6 @@ public class AttendanceChecking extends AppCompatActivity {
                 finish();
             }
         }
-
-
     }
 
     @Override
@@ -169,7 +169,7 @@ public class AttendanceChecking extends AppCompatActivity {
      */
     private static Intent getServiceIntent(Context c) {
         Intent intent = new Intent(c, ScannerService.class);
-        //TODO: Use this to send info to Advertise Service
+        //TODO: Use this to send info to Scanner Service
 //        intent.putExtra("message", "Put message here!!");
         return intent;
     }
@@ -210,7 +210,6 @@ public class AttendanceChecking extends AppCompatActivity {
         }
     }
 
-
     //Check for permission to discover other devices
     //Test
     private void checkBTPermissions() {
@@ -231,7 +230,11 @@ public class AttendanceChecking extends AppCompatActivity {
 //                    String abc = intent.getStringExtra("ABC");
 //                    Toast.makeText(getApplicationContext(), abc, Toast.LENGTH_SHORT).show();
                     scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
-                    Toast.makeText(getApplicationContext(), scanResults.get(0).getDevice().getName(), Toast.LENGTH_SHORT).show();
+
+                    List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
+                    String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
+                    //Toast.makeText(getApplicationContext(), scanResults.get(0).getDevice().getName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), receivedData, Toast.LENGTH_SHORT).show();
                     String totalNumber = " " + scanResults.size() + " ";
                     totalNumTextView.setText(totalNumber);
                 } catch (Resources.NotFoundException e) {

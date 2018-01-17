@@ -29,8 +29,10 @@ public class LecturerLogIn extends AppCompatActivity {
         username = usernameText.getText().toString();
         password = passwordText.getText().toString();
         String method = "login";
-        BackgroundTask1 backgroundTask1 = new BackgroundTask1(this);
-        backgroundTask1.execute(method, username, password);
+        Intent i = new Intent(getApplicationContext(), LecturerMenu.class);
+        startActivity(i);
+//        BackgroundTask1 backgroundTask1 = new BackgroundTask1(this);
+//        backgroundTask1.execute(method, username, password);
 
     }
 }
