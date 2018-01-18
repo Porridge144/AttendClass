@@ -17,6 +17,7 @@ import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,12 +28,14 @@ import java.util.concurrent.ExecutionException;
 
 public class AttendanceTaking extends AppCompatActivity {
 
+    EditText setLabel;
+
     private BroadcastReceiver advertisingFailureReceiver;
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private Switch startAdvertiseSwitch;
     private ArrayList<ScanResult> scanResults;
-    private int mlabelData;
+    private String mlabelData;
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
@@ -40,6 +43,8 @@ public class AttendanceTaking extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_taking);
+
+        setLabel = (EditText) findViewById(R.id.setLabel);
 
         if (savedInstanceState == null) {
 
@@ -141,6 +146,11 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
+    public void confirmLabelOnClick(View view){
+        mlabelData = setLabel.getText().toString();
+        Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void relayOnClicked(View view) {
 
@@ -148,38 +158,7 @@ public class AttendanceTaking extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
 
-//        scanningFailureReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                int errorCode = intent.getIntExtra(ScannerService.SCANNING_FAILED_EXTRA_CODE, -1);
-//
-//                String errorMessage = getString(R.string.start_error_prefix);
-//                switch (errorCode) {
-//                    case ScanCallback.SCAN_FAILED_ALREADY_STARTED:
-//                        errorMessage += " " + getString(R.string.start_error_already_started);
-//                        break;
-//                    case ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED:
-//                        errorMessage += " " + getString(R.string.start_error_unsupported);
-//                        break;
-//                    case ScanCallback.SCAN_FAILED_INTERNAL_ERROR:
-//                        errorMessage += " " + getString(R.string.start_error_internal);
-//                        break;
-//                    case ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
-//                        errorMessage += " " + getString(R.string.start_error_registration_failed);
-//                        break;
-//                    case ScannerService.SCANNING_TIMED_OUT:
-//                        errorMessage = " " + getString(R.string.scanning_time_out);
-//                        break;
-//                    default:
-//                        errorMessage += " " + getString(R.string.start_error_unknown);
-//                }
-//
-//                Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
-//            }
-//        };
-
         startScanning();
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -203,27 +182,21 @@ public class AttendanceTaking extends AppCompatActivity {
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
 //                    String receivedData = scanResults.get(0).getDevice().getName();
-                    StudentLogIn.globalRelayUsername = receivedData;
 
-                    startAdvertising(receivedData);
-//
-                    context.unregisterReceiver(scanResultsReceiver);
-                    Toast.makeText(getApplicationContext(), receivedData, Toast.LENGTH_SHORT).show();
-                    stopScanning();
-                    //String[] temp = receivedData.split("\\s");
-                    //int labelData = Integer.parseInt(temp[0]);
-                    //String userID = temp[1];
+                    String[] temp = receivedData.split("\\s");
+                    int relayedLabelData = Integer.parseInt(temp[0]);
+                    String relayedUserID = temp[1];
+                    StudentLogIn.globalRelayUsername = relayedUserID;
 
-//                    if (labelData > mlabelData) {
-//                        // need to relay
-//                        Intent newRelayIntent = new Intent();
-//                        newRelayIntent.setAction(RELAY_NEEDED);
-//                        newRelayIntent.putExtra("RelayData", receivedData);
-//                        sendBroadcast(newRelayIntent);
-//                    }
+                    if (relayedLabelData > Integer.parseInt(mlabelData)) {
+                        // need to relay
+                        startAdvertising(relayedUserID);
+                        context.unregisterReceiver(scanResultsReceiver);
+                        Toast.makeText(getApplicationContext(), "User ID is " + relayedUserID + " and label is " + relayedLabelData, Toast.LENGTH_SHORT).show();
+                        // stop scan to avoid collision
+                        stopScanning();
+                    }
 
-                    // String totalNumber = " " + scanResults.size() + " ";
-                    // totalNumTextView.setText(totalNumber);
                 } catch (Resources.NotFoundException e) {
                     Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
