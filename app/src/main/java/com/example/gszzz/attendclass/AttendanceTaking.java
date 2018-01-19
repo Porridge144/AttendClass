@@ -34,10 +34,14 @@ public class AttendanceTaking extends AppCompatActivity {
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private Switch startAdvertiseSwitch;
+    private Switch relaySwitch;
     private ArrayList<ScanResult> scanResults;
     private String mlabelData;
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
+    public static final int ADVERTISE_DURATION = 3*1000; // 3s
+    public static final int SCAN_DURATION = 7*1000;      // 7s
+    public static final int PERIOD = ADVERTISE_DURATION + SCAN_DURATION;  // period is 10s
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +83,7 @@ public class AttendanceTaking extends AppCompatActivity {
         }
 
         startAdvertiseSwitch = (Switch)findViewById(R.id.startAdvertiseSwitch);
+        relaySwitch = (Switch)findViewById(R.id.relaySwitch);
 
         advertisingFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -114,6 +119,11 @@ public class AttendanceTaking extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
             }
         };
+
+        //TODO: if it's scanning something, note down the label number it hears
+//        if (ScannerService.running){
+//
+//        }
     }
 
     @Override
@@ -153,6 +163,16 @@ public class AttendanceTaking extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void relayOnClicked(View view) {
+        boolean on = ((Switch) view).isChecked();
+        if (AdvertiserService.running){
+            // if it is advertising, switch off it to avoid collision
+            startAdvertiseSwitch.setChecked(false);
+        }
+        if (on) {
+            startScanning();
+        } else {
+            stopScanning();
+        }
 
         scanResults = new ArrayList<>();
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
@@ -219,6 +239,11 @@ public class AttendanceTaking extends AppCompatActivity {
         } else {
             startAdvertiseSwitch.setChecked(false);
         }
+        if (ScannerService.running) {
+            relaySwitch.setChecked(true);
+        } else {
+            relaySwitch.setChecked(false);
+        }
 
         IntentFilter intentFilter = new IntentFilter(AdvertiserService.ADVERTISING_FAILED);
         registerReceiver(advertisingFailureReceiver, intentFilter);
@@ -239,7 +264,10 @@ public class AttendanceTaking extends AppCompatActivity {
     public void startAdvertiseOnClicked(View view) {
         //Is the toggle on?
         boolean on = ((Switch) view).isChecked();
-
+        if (ScannerService.running){
+            // if it is scanning, switch off it to avoid collision
+            relaySwitch.setChecked(false);
+        }
         if (on) {
             startAdvertising();
         } else {
@@ -247,9 +275,9 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
-    private void startAdvertising(String receivedData) {
+    private void startAdvertising(String relayedUserID) {
         Context c = getApplicationContext();
-        c.startService(getAdvertiseServiceIntent(c, receivedData));
+        c.startService(getAdvertiseServiceIntent(c, relayedUserID));
     }
 
     private void startAdvertising() {
@@ -276,11 +304,11 @@ public class AttendanceTaking extends AppCompatActivity {
     /**
      * Returns Intent addressed to the {@code AdvertiserService} class.
      */
-    private static Intent getAdvertiseServiceIntent(Context c, String receivedData) {
+    private static Intent getAdvertiseServiceIntent(Context c, String relayedUserID) {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
         //intent.putExtra("message", "Put message here!!");
-        intent.putExtra("RelayData", receivedData);
+        //intent.putExtra("RelayData", relayedUserID);
         return intent;
     }
 

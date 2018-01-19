@@ -10,19 +10,18 @@
         android:id="@+id/moduleInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/Greeting"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="72dp"
-        android:textSize="25dp"
-        android:text="This is EE1001" />
+        android:layout_marginTop="38dp"
+        android:text="This is EE1001"
+        android:textSize="25dp" />
 
     <TextView
         android:id="@+id/totalNumTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/moduleInfo"
+        android:layout_above="@+id/furtherInfo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="78dp"
         android:text="43/50"
         android:textSize="35dp" />
 
@@ -46,5 +45,28 @@
         android:layout_marginBottom="92dp"
         android:onClick="stopScanningOnClicked"
         android:text="Stop Scanning" />
+
+    <Switch
+        android:id="@+id/startBroadcast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/stopScanningTempButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="35dp"
+        android:checked="false"
+        android:splitTrack="false"
+        android:text="Broadcast"
+        android:onClick="broadcastOnClicked"
+        tools:checked="false" />
+
+    <TextView
+        android:id="@+id/Greeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        android:text="Hello Professor"
+        android:textSize="25dp" />
 
 </RelativeLayout>

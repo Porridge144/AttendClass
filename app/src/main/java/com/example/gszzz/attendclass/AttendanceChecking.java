@@ -5,15 +5,19 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.AdvertiseCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,18 +30,21 @@ public class AttendanceChecking extends AppCompatActivity {
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
+    private Switch startBroadcastSwitch;
     private ArrayList<ScanResult> scanResults;
-    private int mlabelData = 0;
+    public static String mlabelData = "0";
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.M)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_checking);
 
         scanResults = new ArrayList<>();
         totalNumTextView = (TextView) findViewById(R.id.totalNumTextView);
+        startBroadcastSwitch = (Switch) findViewById(R.id.startBroadcast);
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
 
@@ -111,6 +118,7 @@ public class AttendanceChecking extends AppCompatActivity {
     }
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.M)
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
@@ -141,7 +149,23 @@ public class AttendanceChecking extends AppCompatActivity {
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
 
+    public void broadcastOnClicked(View view){
+        boolean on = ((Switch) view).isChecked();
+        //Is the toggle on?
+        if (on) {
+            //stopAdvertising();
+            //unregisterReceiver(scanResultsReceiver);
+            //unregisterReceiver(scanningFailureReceiver);
+            stopScanning();
+        } else {
+            startScanning();
+            // IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+            //registerReceiver(scanResultsReceiver, filter);
+            // broadcast that "I'm lecturer and you are hearing from label 0"
+            //startAdvertising(mlabelData);
+        }
     }
 
     @Override
@@ -156,18 +180,44 @@ public class AttendanceChecking extends AppCompatActivity {
 
     private void startScanning() {
         Context c = getApplicationContext();
-        c.startService(getServiceIntent(c));
+        c.startService(getScannerServiceIntent(c));
     }
 
     private void stopScanning() {
         Context c = getApplicationContext();
-        c.stopService(getServiceIntent(c));
+        c.stopService(getScannerServiceIntent(c));
+    }
+
+    private void startAdvertising(String lecturerLabel) {
+        Context c = getApplicationContext();
+        c.startService(getAdvertiseServiceIntent(c, lecturerLabel));
+    }
+
+    private void stopAdvertising() {
+        Context c = getApplicationContext();
+        c.stopService(getAdvertiseServiceIntent(c));
     }
 
     /**
      * Returns Intent addressed to the {@code AdvertiserService} class.
      */
-    private static Intent getServiceIntent(Context c) {
+
+    private static Intent getAdvertiseServiceIntent(Context c) {
+        Intent intent = new Intent(c, AdvertiserService.class);
+        //TODO: Use this to send info to Advertise Service
+        //intent.putExtra("message", "Put message here!!");
+        return intent;
+    }
+
+    private static Intent getAdvertiseServiceIntent(Context c, String lecturerLabel) {
+        Intent intent = new Intent(c, AdvertiserService.class);
+        //TODO: Use this to send info to Advertise Service
+        //intent.putExtra("message", "Put message here!!");
+        //intent.putExtra("ClassBegins", lecturerLabel);
+        return intent;
+    }
+
+    private static Intent getScannerServiceIntent(Context c) {
         Intent intent = new Intent(c, ScannerService.class);
         //TODO: Use this to send info to Scanner Service
 //        intent.putExtra("message", "Put message here!!");
@@ -181,7 +231,6 @@ public class AttendanceChecking extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         IntentFilter intentFilter = new IntentFilter(ScannerService.SCANNING_FAILED);
         registerReceiver(scanningFailureReceiver, intentFilter);
     }
@@ -211,7 +260,7 @@ public class AttendanceChecking extends AppCompatActivity {
     }
 
     //Check for permission to discover other devices
-    //Test
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void checkBTPermissions() {
         int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
         permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");

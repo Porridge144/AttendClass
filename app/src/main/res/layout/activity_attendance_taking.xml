@@ -46,13 +46,14 @@
         android:textSize="27sp"
         android:text="At E5-04-21" />
 
-    <Button
-        android:id="@+id/relayButton"
+    <Switch
+        android:id="@+id/relaySwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/defaultText"
         android:layout_below="@+id/moduleLocation"
         android:layout_marginTop="17dp"
+        android:allowUndo="false"
         android:onClick="relayOnClicked"
         android:text="Scan for Relay"
         android:textSize="23sp" />
@@ -61,8 +62,8 @@
         android:id="@+id/setLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/relayButton"
-        android:layout_below="@+id/relayButton"
+        android:layout_alignEnd="@+id/relaySwitch"
+        android:layout_below="@+id/relaySwitch"
         android:layout_marginTop="15dp"
         android:ems="10"
         android:hint="set your label here"

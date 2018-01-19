@@ -56,6 +56,9 @@ public class AdvertiserService extends Service {
         if(StudentLogIn.globalRelayUsername != ""){
             advertisingData = StudentLogIn.globalRelayUsername;
         }
+//        if(){
+//
+//        }
         startAdvertising();
         setTimeout();
         super.onCreate();
