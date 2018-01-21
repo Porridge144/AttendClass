@@ -65,14 +65,14 @@ public class ScannerService extends Service {
     private void startScanning() {
         goForeground();
         if (mScanCallback == null) {
-            Toast.makeText(getApplicationContext(), "Starting scanning ", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Starting scanning ", Toast.LENGTH_SHORT).show();
             //set timeout for scanning
             setTimeout();
             //start a new scan
             mScanCallback = new SampleScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
 
-            Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), R.string.scanning_already_started, Toast.LENGTH_SHORT).show();
         }
@@ -84,7 +84,7 @@ public class ScannerService extends Service {
         stopScanning();
         mHandler.removeCallbacks(timeoutRunnable);
         stopForeground(true);
-        Toast.makeText(getApplicationContext(), "Scanning stopped...", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Scanning stopped...", Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }
 
@@ -101,7 +101,7 @@ public class ScannerService extends Service {
             for (ScanResult result : results) {
                 addScanResult(result);
             }
-            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
 
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
@@ -115,7 +115,7 @@ public class ScannerService extends Service {
             //add to the scanResults list
             addScanResult(result);
 
-            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
 
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
@@ -200,7 +200,7 @@ public class ScannerService extends Service {
     }
 
     private void stopScanning() {
-        Toast.makeText(getApplicationContext(), "Stopping scanning...", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Stopping scanning...", Toast.LENGTH_SHORT).show();
 
         //Stop the scan, wipe the callback.
         mBluetoothLeScanner.stopScan(mScanCallback);

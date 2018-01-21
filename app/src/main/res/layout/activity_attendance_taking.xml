@@ -5,17 +5,6 @@
     android:layout_height="match_parent"
     tools:context="com.example.gszzz.attendclass.AttendanceTaking">
 
-    <Switch
-        android:id="@+id/startAdvertiseSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/confirmLabelButton"
-        android:layout_below="@+id/confirmLabelButton"
-        android:layout_marginTop="20dp"
-        android:allowUndo="false"
-        android:onClick="startAdvertiseOnClicked"
-        android:text="Start Advertise" />
-
     <TextView
         android:id="@+id/defaultText"
         android:layout_width="wrap_content"
@@ -30,11 +19,11 @@
         android:id="@+id/moduleInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="39dp"
-        android:text="EE1001"
-        android:textSize="30sp"
         android:layout_below="@+id/defaultText"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="38dp"
+        android:text="EE1001"
+        android:textSize="30sp" />
 
     <TextView
         android:id="@+id/moduleLocation"
@@ -52,19 +41,31 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/defaultText"
         android:layout_below="@+id/moduleLocation"
-        android:layout_marginTop="17dp"
+        android:layout_marginTop="29dp"
         android:allowUndo="false"
         android:onClick="relayOnClicked"
         android:text="Scan for Relay"
+        android:textSize="23sp" />
+
+    <Switch
+        android:id="@+id/startAdvertiseSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/relaySwitch"
+        android:layout_below="@+id/relaySwitch"
+        android:layout_marginTop="16dp"
+        android:allowUndo="false"
+        android:onClick="startAdvertiseOnClicked"
+        android:text="Start Advertise"
         android:textSize="23sp" />
 
     <EditText
         android:id="@+id/setLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/relaySwitch"
-        android:layout_below="@+id/relaySwitch"
-        android:layout_marginTop="15dp"
+        android:layout_below="@+id/startAdvertiseSwitch"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:ems="10"
         android:hint="set your label here"
         android:inputType="number" />

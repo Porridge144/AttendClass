@@ -42,7 +42,7 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
-    private String advertisingData = StudentLogIn.globalUsername;
+    private String advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalUsername;
 
     /**
      * Length of time to allow advertising before automatically shutting off. (5 minutes)
@@ -54,11 +54,8 @@ public class AdvertiserService extends Service {
         running = true;
         initialize();
         if(StudentLogIn.globalRelayUsername != ""){
-            advertisingData = StudentLogIn.globalRelayUsername;
+            advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalRelayUsername;
         }
-//        if(){
-//
-//        }
         startAdvertising();
         setTimeout();
         super.onCreate();
@@ -76,7 +73,7 @@ public class AdvertiserService extends Service {
     private void startAdvertising() {
         goForeground();
 
-        Toast.makeText(getApplicationContext(), "Starting Advertising ", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "Starting Advertising ", Toast.LENGTH_LONG).show();
 
         if (mAdvertiseCallback == null) {
             AdvertiseSettings settings = buildAdvertiseSettings();
@@ -147,11 +144,11 @@ public class AdvertiserService extends Service {
     }
 
     private void stopAdvertising() {
-        Toast.makeText(getApplicationContext(), "Stopping Advertising ", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "Stopping Advertising ", Toast.LENGTH_LONG).show();
         if (mBluetoothLeAdvertiser != null) {
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
             mAdvertiseCallback = null;
-            Toast.makeText(getApplicationContext(), "Advertisement stopped successfully... ", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Advertisement stopped successfully... ", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -233,11 +230,8 @@ public class AdvertiserService extends Service {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
-            Toast.makeText(getApplicationContext(), "Advertisement started successfully...", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Advertisement started successfully...", Toast.LENGTH_LONG).show();
         }
-    }
-
-    public AdvertiserService() {
     }
 
     @Override

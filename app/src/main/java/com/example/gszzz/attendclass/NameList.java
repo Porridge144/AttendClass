@@ -56,7 +56,7 @@ public class NameList extends AppCompatActivity implements AdapterView.OnItemCli
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         String deviceName = scanResults.get(i).getDevice().getName();
         List deviceUuid = scanResults.get(i).getScanRecord().getServiceUuids();
-        String deviceMessage = scanResults.get(i).getScanRecord().getServiceData().get(deviceUuid).toString();
+        String deviceMessage = new String(scanResults.get(i).getScanRecord().getServiceData().get(deviceUuid.get(0)));
         Toast.makeText(getApplicationContext(), "You have clicked device: " + deviceMessage, Toast.LENGTH_SHORT).show();
     }
 }

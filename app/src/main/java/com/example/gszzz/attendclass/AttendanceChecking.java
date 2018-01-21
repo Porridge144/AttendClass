@@ -155,16 +155,16 @@ public class AttendanceChecking extends AppCompatActivity {
         boolean on = ((Switch) view).isChecked();
         //Is the toggle on?
         if (on) {
-            //stopAdvertising();
+            stopScanning();
+            startAdvertising(mlabelData);
             //unregisterReceiver(scanResultsReceiver);
             //unregisterReceiver(scanningFailureReceiver);
-            stopScanning();
         } else {
-            startScanning();
+            //startScanning();
             // IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
             //registerReceiver(scanResultsReceiver, filter);
             // broadcast that "I'm lecturer and you are hearing from label 0"
-            //startAdvertising(mlabelData);
+            stopAdvertising();
         }
     }
 
@@ -213,7 +213,7 @@ public class AttendanceChecking extends AppCompatActivity {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
         //intent.putExtra("message", "Put message here!!");
-        //intent.putExtra("ClassBegins", lecturerLabel);
+        intent.putExtra("ClassBegins", lecturerLabel);
         return intent;
     }
 
@@ -248,7 +248,6 @@ public class AttendanceChecking extends AppCompatActivity {
 
     public void enterNameList(View view) {
         Intent intent = new Intent(this, NameList.class);
-
         startActivity(intent);
     }
 
@@ -283,7 +282,10 @@ public class AttendanceChecking extends AppCompatActivity {
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
                     //Toast.makeText(getApplicationContext(), scanResults.get(0).getDevice().getName(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), receivedData, Toast.LENGTH_SHORT).show();
+                    String[] temp = receivedData.split("\\s");
+                    int receivedLabel = Integer.parseInt(temp[0]);
+                    String receivedUserID = temp[1];
+                    Toast.makeText(getApplicationContext(), receivedUserID, Toast.LENGTH_SHORT).show();
                     String totalNumber = " " + scanResults.size() + " ";
                     totalNumTextView.setText(totalNumber);
                 } catch (Resources.NotFoundException e) {

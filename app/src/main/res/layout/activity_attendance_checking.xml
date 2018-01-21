@@ -57,7 +57,8 @@
         android:splitTrack="false"
         android:text="Broadcast"
         android:onClick="broadcastOnClicked"
-        tools:checked="false" />
+        tools:checked="false"
+        android:textSize="23sp" />
 
     <TextView
         android:id="@+id/Greeting"

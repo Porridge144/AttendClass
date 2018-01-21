@@ -33,10 +33,10 @@ public class AttendanceTaking extends AppCompatActivity {
     private BroadcastReceiver advertisingFailureReceiver;
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
-    private Switch startAdvertiseSwitch;
-    private Switch relaySwitch;
+    public static Switch startAdvertiseSwitch;
+    public static Switch relaySwitch;
     private ArrayList<ScanResult> scanResults;
-    private String mlabelData;
+    public static String mlabelData;
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
     public static final int ADVERTISE_DURATION = 3*1000; // 3s
@@ -159,12 +159,13 @@ public class AttendanceTaking extends AppCompatActivity {
     public void confirmLabelOnClick(View view){
         mlabelData = setLabel.getText().toString();
         Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void relayOnClicked(View view) {
         boolean on = ((Switch) view).isChecked();
-        if (AdvertiserService.running){
+        if (startAdvertiseSwitch.isChecked()){
             // if it is advertising, switch off it to avoid collision
             startAdvertiseSwitch.setChecked(false);
         }
@@ -178,7 +179,7 @@ public class AttendanceTaking extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
 
-        startScanning();
+        //startScanning();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -210,11 +211,11 @@ public class AttendanceTaking extends AppCompatActivity {
 
                     if (relayedLabelData > Integer.parseInt(mlabelData)) {
                         // need to relay
-                        startAdvertising(relayedUserID);
-                        context.unregisterReceiver(scanResultsReceiver);
-                        Toast.makeText(getApplicationContext(), "User ID is " + relayedUserID + " and label is " + relayedLabelData, Toast.LENGTH_SHORT).show();
-                        // stop scan to avoid collision
                         stopScanning();
+                        context.unregisterReceiver(scanResultsReceiver);
+                        Toast.makeText(getApplicationContext(), "User ID is " + relayedUserID + " and label is " + relayedLabelData, Toast.LENGTH_LONG).show();
+                        // stop scan to avoid collision
+                        startAdvertising(relayedUserID);
                     }
 
                 } catch (Resources.NotFoundException e) {
@@ -261,10 +262,24 @@ public class AttendanceTaking extends AppCompatActivity {
         unregisterReceiver(scanningFailureReceiver);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(scanResultsReceiver);
+        if (ScannerService.running) {
+            stopScanning();
+            relaySwitch.setChecked(false);
+        }
+        if (AdvertiserService.running){
+            stopAdvertising();
+            startAdvertiseSwitch.setChecked(false);
+        }
+    }
+
     public void startAdvertiseOnClicked(View view) {
         //Is the toggle on?
         boolean on = ((Switch) view).isChecked();
-        if (ScannerService.running){
+        if (relaySwitch.isChecked()){
             // if it is scanning, switch off it to avoid collision
             relaySwitch.setChecked(false);
         }
@@ -299,6 +314,7 @@ public class AttendanceTaking extends AppCompatActivity {
     private void stopScanning() {
         Context c = getApplicationContext();
         c.stopService(getScannerServiceIntent(c));
+        //relaySwitch.setChecked(false);
     }
 
     /**
