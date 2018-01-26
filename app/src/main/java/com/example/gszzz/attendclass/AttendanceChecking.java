@@ -132,7 +132,6 @@ public class AttendanceChecking extends AppCompatActivity {
                         checkBTPermissions();
                         //Start service
                         startScanning();
-
                     } else {
 
                         // Bluetooth Advertisements are not supported.

@@ -36,7 +36,7 @@ public class AttendanceTaking extends AppCompatActivity {
     public static Switch startAdvertiseSwitch;
     public static Switch relaySwitch;
     private ArrayList<ScanResult> scanResults;
-    public static String mlabelData;
+    public static String mlabelData="";
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
     public static final int ADVERTISE_DURATION = 3*1000; // 3s
@@ -156,11 +156,11 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
-    public void confirmLabelOnClick(View view){
-        mlabelData = setLabel.getText().toString();
-        Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
-
-    }
+//    public void confirmLabelOnClick(View view){
+//        mlabelData = setLabel.getText().toString();
+//        Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
+//
+//    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void relayOnClicked(View view) {
@@ -209,13 +209,25 @@ public class AttendanceTaking extends AppCompatActivity {
                     String relayedUserID = temp[1];
                     StudentLogIn.globalRelayUsername = relayedUserID;
 
-                    if (relayedLabelData > Integer.parseInt(mlabelData)) {
-                        // need to relay
+                    // if this device hasn't been assigned with label, or the current label is too large
+                    if(mlabelData.equals("") || relayedLabelData <= Integer.parseInt(mlabelData)-2){
+                        if(relayedLabelData==0){
+                            // hearing from lecturer
+                            mlabelData = "1";
+                        }
+                        else{
+                            mlabelData = Integer.toString(relayedLabelData + 1 );
+                        }
+                        Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
+                    }
+                    // need to relay
+                    else if (relayedLabelData > Integer.parseInt(mlabelData)) {
                         stopScanning();
-                        context.unregisterReceiver(scanResultsReceiver);
-                        Toast.makeText(getApplicationContext(), "User ID is " + relayedUserID + " and label is " + relayedLabelData, Toast.LENGTH_LONG).show();
+                        //context.unregisterReceiver(scanResultsReceiver);
+                        Toast.makeText(getApplicationContext(), "User ID is " + relayedUserID + " and label is " + Integer.toString(relayedLabelData), Toast.LENGTH_LONG).show();
                         // stop scan to avoid collision
                         startAdvertising(relayedUserID);
+
                     }
 
                 } catch (Resources.NotFoundException e) {
@@ -314,7 +326,7 @@ public class AttendanceTaking extends AppCompatActivity {
     private void stopScanning() {
         Context c = getApplicationContext();
         c.stopService(getScannerServiceIntent(c));
-        //relaySwitch.setChecked(false);
+        relaySwitch.setChecked(false);
     }
 
     /**
@@ -324,14 +336,14 @@ public class AttendanceTaking extends AppCompatActivity {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
         //intent.putExtra("message", "Put message here!!");
-        //intent.putExtra("RelayData", relayedUserID);
+        intent.putExtra("RelayData", relayedUserID);
         return intent;
     }
 
     private static Intent getAdvertiseServiceIntent(Context c) {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
-        //intent.putExtra("message", "Put message here!!");
+        intent.putExtra("SelfData", mlabelData);
         return intent;
     }
 

@@ -42,7 +42,7 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
-    private String advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalUsername;
+    private String advertisingData;
 
     /**
      * Length of time to allow advertising before automatically shutting off. (5 minutes)
@@ -53,9 +53,11 @@ public class AdvertiserService extends Service {
     public void onCreate() {
         running = true;
         initialize();
-        if(StudentLogIn.globalRelayUsername != ""){
-            advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalRelayUsername;
-        }
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ClassBegins");
+        filter.addAction("RelayData");
+        filter.addAction("SelfData");
+        registerReceiver(receiver, filter);
         startAdvertising();
         setTimeout();
         super.onCreate();
@@ -65,6 +67,7 @@ public class AdvertiserService extends Service {
     public void onDestroy() {
         running = false;
         stopAdvertising();
+        unregisterReceiver(receiver);
         mHandler.removeCallbacks(timeoutRunnable);
         stopForeground(true);
         super.onDestroy();
@@ -239,6 +242,25 @@ public class AdvertiserService extends Service {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action.equals("ClassBegins")){
+                advertisingData = "0 lecturer";
+            }
+            else if(action.equals("RelayData")){
+                advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalRelayUsername;
+            }
+            else if(action.equals("SelfData")){
+                advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalUsername;
+            }
+            else{
+                advertisingData = "null";
+            }
+        }
+    };
 
 //    /**
 //     * When app goes off screen, unregister the Advertising failure Receiver to stop memory leaks.
