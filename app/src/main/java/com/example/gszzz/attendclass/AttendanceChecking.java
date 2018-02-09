@@ -30,9 +30,7 @@ public class AttendanceChecking extends AppCompatActivity {
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
-    private Switch startBroadcastSwitch;
     private ArrayList<ScanResult> scanResults;
-    public static String mlabelData = "0";
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
@@ -44,7 +42,6 @@ public class AttendanceChecking extends AppCompatActivity {
 
         scanResults = new ArrayList<>();
         totalNumTextView = (TextView) findViewById(R.id.totalNumTextView);
-        startBroadcastSwitch = (Switch) findViewById(R.id.startBroadcast);
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
 
@@ -150,23 +147,6 @@ public class AttendanceChecking extends AppCompatActivity {
         }
     }
 
-    public void broadcastOnClicked(View view){
-        boolean on = ((Switch) view).isChecked();
-        //Is the toggle on?
-        if (on) {
-            stopScanning();
-            startAdvertising(mlabelData);
-            //unregisterReceiver(scanResultsReceiver);
-            //unregisterReceiver(scanningFailureReceiver);
-        } else {
-            //startScanning();
-            // IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-            //registerReceiver(scanResultsReceiver, filter);
-            // broadcast that "I'm lecturer and you are hearing from label 0"
-            stopAdvertising();
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -211,8 +191,9 @@ public class AttendanceChecking extends AppCompatActivity {
     private static Intent getAdvertiseServiceIntent(Context c, String lecturerLabel) {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
-        //intent.putExtra("message", "Put message here!!");
-        intent.putExtra("ClassBegins", lecturerLabel);
+        intent.putExtra("Instruction", lecturerLabel);
+        intent.putExtra("Indicator", "lec");
+        //intent.setAction("ClassBegins");
         return intent;
     }
 
@@ -274,17 +255,22 @@ public class AttendanceChecking extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ScannerService.NEW_DEVICE_FOUND)) {
                 try {
-//                    String abc = intent.getStringExtra("ABC");
-//                    Toast.makeText(getApplicationContext(), abc, Toast.LENGTH_SHORT).show();
+
                     scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
 
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
-                    //Toast.makeText(getApplicationContext(), scanResults.get(0).getDevice().getName(), Toast.LENGTH_SHORT).show();
-                    String[] temp = receivedData.split("\\s");
-                    int receivedLabel = Integer.parseInt(temp[0]);
-                    String receivedUserID = temp[1];
-                    Toast.makeText(getApplicationContext(), receivedUserID, Toast.LENGTH_SHORT).show();
+
+                    String[] temp = receivedData.split(" ");
+                    String receivedPageNum = temp[0];
+                    String relayedBitmap = temp[1];
+
+                    // e.g. if it receives page 1, then XOR myBitmap[1] with received Bitmap
+                    if(AdvertiserService.bitmap[Integer.parseInt(receivedPageNum)] == relayedBitmap){
+                        startScanning();
+                    } else {
+                        //TODO: XOR the two bitmaps
+                    }
                     String totalNumber = " " + scanResults.size() + " ";
                     totalNumTextView.setText(totalNumber);
                 } catch (Resources.NotFoundException e) {

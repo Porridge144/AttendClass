@@ -46,20 +46,6 @@
         android:onClick="stopScanningOnClicked"
         android:text="Stop Scanning" />
 
-    <Switch
-        android:id="@+id/startBroadcast"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/stopScanningTempButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="35dp"
-        android:checked="false"
-        android:splitTrack="false"
-        android:text="Broadcast"
-        android:onClick="broadcastOnClicked"
-        tools:checked="false"
-        android:textSize="23sp" />
-
     <TextView
         android:id="@+id/Greeting"
         android:layout_width="wrap_content"

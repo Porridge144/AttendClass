@@ -13,9 +13,11 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -29,26 +31,82 @@ import java.util.concurrent.ExecutionException;
 public class AttendanceTaking extends AppCompatActivity {
 
     EditText setLabel;
-
+    private static final String TAG = "AttendanceTaking";
     private BroadcastReceiver advertisingFailureReceiver;
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
-    public static Switch startAdvertiseSwitch;
-    public static Switch relaySwitch;
+    private TextView labelTextView;
+    private TextView moduleLocationTextView;
+    private TextView dataTextView;
     private ArrayList<ScanResult> scanResults;
-    public static String mlabelData="";
+    public String pageNum;
+    public boolean restIndicator = false;
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
-    public static final int ADVERTISE_DURATION = 3*1000; // 3s
-    public static final int SCAN_DURATION = 7*1000;      // 7s
-    public static final int PERIOD = ADVERTISE_DURATION + SCAN_DURATION;  // period is 10s
+    long startTime = 0;
+
+    //runs without a timer by reposting this handler at the end of the runnable
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            labelTextView.setText(String.format("%d:%02d", minutes, seconds));
+
+            timerHandler.postDelayed(this, 500);
+
+            if (seconds == 1 && !restIndicator){
+                // 1~2s
+                stopScanning();
+                pageNum = "0";
+                startAdvertising(pageNum);
+                moduleLocationTextView.setText("Now is advertising page " + pageNum);
+                dataTextView.setText("Data is " + AdvertiserService.bitmap[0]);
+            } else if (seconds == 2 && !restIndicator){
+                // 2~3s
+                stopAdvertising();
+                pageNum = "1";
+                startAdvertising(pageNum);
+                moduleLocationTextView.setText("Now is advertising page " + pageNum);
+                dataTextView.setText("Data is " + AdvertiserService.bitmap[1]);
+            } else if (seconds == 3 && !restIndicator){
+                // 3~4s
+                stopAdvertising();
+                pageNum = "2";
+                startAdvertising(pageNum);
+                moduleLocationTextView.setText("Now is advertising page " + pageNum);
+                dataTextView.setText("Data is " + AdvertiserService.bitmap[2]);
+            } else if (seconds == 4 && !restIndicator){
+                // 4~5s
+                stopAdvertising();
+                pageNum = "3";
+                startAdvertising(pageNum);
+                moduleLocationTextView.setText("Now is advertising page " + pageNum);
+                dataTextView.setText("Data is " + AdvertiserService.bitmap[3]);
+            } else if (seconds == 5) {
+                // from 5s onwards
+                stopAdvertising();
+                startScanning();
+                moduleLocationTextView.setText("Now is scanning");
+                dataTextView.setText("Not advertising...");
+            }
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_taking);
 
-        setLabel = (EditText) findViewById(R.id.setLabel);
+        labelTextView = (TextView) findViewById(R.id.textView4);
+        dataTextView = (TextView) findViewById(R.id.textView3);
+        moduleLocationTextView = (TextView) findViewById(R.id.moduleLocation);
 
         if (savedInstanceState == null) {
 
@@ -70,7 +128,6 @@ public class AttendanceTaking extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), R.string.bluetooth_advertisment_not_supported, Toast.LENGTH_LONG).show();
                     }
                 } else {
-
                     // Prompt user to turn on Bluetooth (logic continues in onActivityResult()).
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
@@ -82,15 +139,10 @@ public class AttendanceTaking extends AppCompatActivity {
             }
         }
 
-        startAdvertiseSwitch = (Switch)findViewById(R.id.startAdvertiseSwitch);
-        relaySwitch = (Switch)findViewById(R.id.relaySwitch);
-
         advertisingFailureReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int errorCode = intent.getIntExtra(AdvertiserService.ADVERTISING_FAILED_EXTRA_CODE, -1);
-
-                startAdvertiseSwitch.setChecked(false);
 
                 String errorMessage = getString(R.string.start_error_prefix);
                 switch (errorCode) {
@@ -120,10 +172,18 @@ public class AttendanceTaking extends AppCompatActivity {
             }
         };
 
+        startTime = System.currentTimeMillis();
+        timerHandler.postDelayed(timerRunnable, 0);
+
+        scanResults = new ArrayList<>();
+        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+        registerReceiver(scanResultsReceiver, filter);
+
         //TODO: if it's scanning something, note down the label number it hears
 //        if (ScannerService.running){
 //
 //        }
+
     }
 
     @Override
@@ -156,32 +216,6 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
-//    public void confirmLabelOnClick(View view){
-//        mlabelData = setLabel.getText().toString();
-//        Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
-//
-//    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public void relayOnClicked(View view) {
-        boolean on = ((Switch) view).isChecked();
-        if (startAdvertiseSwitch.isChecked()){
-            // if it is advertising, switch off it to avoid collision
-            startAdvertiseSwitch.setChecked(false);
-        }
-        if (on) {
-            startScanning();
-        } else {
-            stopScanning();
-        }
-
-        scanResults = new ArrayList<>();
-        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-        registerReceiver(scanResultsReceiver, filter);
-
-        //startScanning();
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void checkBTPermissions() {
         int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
@@ -202,38 +236,24 @@ public class AttendanceTaking extends AppCompatActivity {
 
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
-//                    String receivedData = scanResults.get(0).getDevice().getName();
 
-                    String[] temp = receivedData.split("\\s");
-                    int relayedLabelData = Integer.parseInt(temp[0]);
-                    String relayedUserID = temp[1];
-                    StudentLogIn.globalRelayUsername = relayedUserID;
+                    String[] temp = receivedData.split(" ");
+                    String receivedPageNum = temp[0];
+                    String relayedBitmap = temp[1];
 
-                    // if this device hasn't been assigned with label, or the current label is too large
-                    if(mlabelData.equals("") || relayedLabelData <= Integer.parseInt(mlabelData)-2){
-                        if(relayedLabelData==0){
-                            // hearing from lecturer
-                            mlabelData = "1";
-                        }
-                        else{
-                            mlabelData = Integer.toString(relayedLabelData + 1 );
-                        }
-                        Toast.makeText(getApplicationContext(), "My label is " + mlabelData, Toast.LENGTH_SHORT).show();
-                    }
-                    // need to relay
-                    else if (relayedLabelData > Integer.parseInt(mlabelData)) {
-                        stopScanning();
-                        //context.unregisterReceiver(scanResultsReceiver);
-                        Toast.makeText(getApplicationContext(), "User ID is " + relayedUserID + " and label is " + Integer.toString(relayedLabelData), Toast.LENGTH_LONG).show();
-                        // stop scan to avoid collision
-                        startAdvertising(relayedUserID);
-
+                    // e.g. if it receives page 1, then XOR myBitmap[1] with received Bitmap
+                    if(AdvertiserService.bitmap[Integer.parseInt(receivedPageNum)] == relayedBitmap){
+                        restIndicator = true;
+                        startScanning();
+                    } else {
+                        restIndicator = false;
+                        //TODO: XOR the two bitmaps
                     }
 
                 } catch (Resources.NotFoundException e) {
-                    Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "AttendanceTaking: NotFoundException...", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "AttendanceChecking: " + e.toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "AttendanceTaking: " + e.toString(), Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -246,18 +266,6 @@ public class AttendanceTaking extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (AdvertiserService.running) {
-            startAdvertiseSwitch.setChecked(true);
-        } else {
-            startAdvertiseSwitch.setChecked(false);
-        }
-        if (ScannerService.running) {
-            relaySwitch.setChecked(true);
-        } else {
-            relaySwitch.setChecked(false);
-        }
-
         IntentFilter intentFilter = new IntentFilter(AdvertiserService.ADVERTISING_FAILED);
         registerReceiver(advertisingFailureReceiver, intentFilter);
         registerReceiver(scanningFailureReceiver, intentFilter);
@@ -270,6 +278,7 @@ public class AttendanceTaking extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        timerHandler.removeCallbacks(timerRunnable);
         unregisterReceiver(advertisingFailureReceiver);
         unregisterReceiver(scanningFailureReceiver);
     }
@@ -278,33 +287,14 @@ public class AttendanceTaking extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(scanResultsReceiver);
-        if (ScannerService.running) {
-            stopScanning();
-            relaySwitch.setChecked(false);
-        }
-        if (AdvertiserService.running){
-            stopAdvertising();
-            startAdvertiseSwitch.setChecked(false);
-        }
+        timerHandler.removeCallbacks(timerRunnable);
+        stopScanning();
+        stopAdvertising();
     }
 
-    public void startAdvertiseOnClicked(View view) {
-        //Is the toggle on?
-        boolean on = ((Switch) view).isChecked();
-        if (relaySwitch.isChecked()){
-            // if it is scanning, switch off it to avoid collision
-            relaySwitch.setChecked(false);
-        }
-        if (on) {
-            startAdvertising();
-        } else {
-            stopAdvertising();
-        }
-    }
-
-    private void startAdvertising(String relayedUserID) {
+    private void startAdvertising(String pageNumber) {
         Context c = getApplicationContext();
-        c.startService(getAdvertiseServiceIntent(c, relayedUserID));
+        c.startService(getAdvertiseServiceIntent(c, pageNumber));
     }
 
     private void startAdvertising() {
@@ -315,7 +305,6 @@ public class AttendanceTaking extends AppCompatActivity {
     private void stopAdvertising() {
         Context c = getApplicationContext();
         c.stopService(getAdvertiseServiceIntent(c));
-        startAdvertiseSwitch.setChecked(false);
     }
 
     private void startScanning() {
@@ -326,24 +315,25 @@ public class AttendanceTaking extends AppCompatActivity {
     private void stopScanning() {
         Context c = getApplicationContext();
         c.stopService(getScannerServiceIntent(c));
-        relaySwitch.setChecked(false);
     }
 
     /**
      * Returns Intent addressed to the {@code AdvertiserService} class.
      */
-    private static Intent getAdvertiseServiceIntent(Context c, String relayedUserID) {
+    private static Intent getAdvertiseServiceIntent(Context c, String pageNumber) {
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
-        //intent.putExtra("message", "Put message here!!");
-        intent.putExtra("RelayData", relayedUserID);
+        intent.putExtra("Instruction", pageNumber);
         return intent;
     }
 
     private static Intent getAdvertiseServiceIntent(Context c) {
+        Log.i(TAG, "getAdvertiseServiceIntent(Context c) ");
         Intent intent = new Intent(c, AdvertiserService.class);
         //TODO: Use this to send info to Advertise Service
-        intent.putExtra("SelfData", mlabelData);
+        //intent.setAction("SelfData");
+//        intent.putExtra("Instruction", "" );
+//        intent.putExtra("Indicator", "stu");
         return intent;
     }
 

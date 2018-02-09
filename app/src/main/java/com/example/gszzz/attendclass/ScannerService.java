@@ -169,6 +169,12 @@ public class ScannerService extends Service {
         // Comment out the below line to see all BLE devices around you
         builder.setServiceUuid(Constants.Service_UUID);
         scanFilters.add(builder.build());
+//        builder.setServiceUuid(Constants.Service_UUID_1);
+//        scanFilters.add(builder.build());
+//        builder.setServiceUuid(Constants.Service_UUID_2);
+//        scanFilters.add(builder.build());
+//        builder.setServiceUuid(Constants.Service_UUID_3);
+//        scanFilters.add(builder.build());
 
         return scanFilters;
     }

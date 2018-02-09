@@ -15,7 +15,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelUuid;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.List;
@@ -42,7 +44,11 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
+    public static String[] bitmap = {"0 0000", "1 0001", "2 0010", "3 0011"};
     private String advertisingData;
+    private String instruction;
+
+    private static final String TAG = "AdvertiserService";
 
     /**
      * Length of time to allow advertising before automatically shutting off. (5 minutes)
@@ -53,21 +59,35 @@ public class AdvertiserService extends Service {
     public void onCreate() {
         running = true;
         initialize();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ClassBegins");
-        filter.addAction("RelayData");
-        filter.addAction("SelfData");
-        registerReceiver(receiver, filter);
-        startAdvertising();
         setTimeout();
         super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        instruction = intent.getStringExtra("Instruction");
+        if(instruction.equals("0")){
+            advertisingData = bitmap[0];
+        }
+        if(instruction.equals("1")){
+            advertisingData = bitmap[1];
+        }
+        if(instruction.equals("2")){
+            advertisingData = bitmap[2];
+        }
+        if(instruction.equals("3")){
+            advertisingData = bitmap[3];
+        }
+        Toast.makeText(this, advertisingData, Toast.LENGTH_LONG).show();
+        startAdvertising();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         running = false;
         stopAdvertising();
-        unregisterReceiver(receiver);
+//        unregisterReceiver(receiver);
         mHandler.removeCallbacks(timeoutRunnable);
         stopForeground(true);
         super.onDestroy();
@@ -95,7 +115,7 @@ public class AdvertiserService extends Service {
      */
     private AdvertiseData buildAdvertiseData() {
 
-        /**
+        /*
          * Note: There is a strict limit of 31 Bytes on packets sent over BLE Advertisements.
          *  This includes everything put into AdvertiseData including UUIDs, device info, &
          *  arbitrary service or manufacturer data.
@@ -106,9 +126,7 @@ public class AdvertiserService extends Service {
 
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.addServiceUuid(Constants.Service_UUID);
-        dataBuilder.setIncludeDeviceName(true);
-
-        // data consists of label no. and student name/id
+        dataBuilder.setIncludeDeviceName(false);
         dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
@@ -129,7 +147,7 @@ public class AdvertiserService extends Service {
         return settingsBuilder.build();
     }
 
-    /**
+    /*
      * Move service to the foreground, to avoid execution limits on background processes.
      * <p>
      * Callers should call stopForeground(true) when background work is complete.
@@ -155,7 +173,7 @@ public class AdvertiserService extends Service {
         }
     }
 
-    /**
+    /*
      * Get references to system Bluetooth objects if we don't have them already.
      */
     private void initialize() {
@@ -174,21 +192,6 @@ public class AdvertiserService extends Service {
         }
 
     }
-
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        running = true;
-//        initialize();
-//        Bundle intentData = intent.getExtras();
-//        if (intentData == null) {
-//            return super.onStartCommand(intent, flags, startId);
-//        }
-//        String message = intentData.getString("RelayData");
-//        advertisingData = message;
-//        startAdvertising();
-//        setTimeout();
-//        return super.onStartCommand(intent, flags, startId);
-//    }
 
     /**
      * Starts a delayed Runnable that will cause the BLE Advertising to timeout and stop after a
@@ -243,26 +246,7 @@ public class AdvertiserService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if(action.equals("ClassBegins")){
-                advertisingData = "0 lecturer";
-            }
-            else if(action.equals("RelayData")){
-                advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalRelayUsername;
-            }
-            else if(action.equals("SelfData")){
-                advertisingData = AttendanceTaking.mlabelData + " " + StudentLogIn.globalUsername;
-            }
-            else{
-                advertisingData = "null";
-            }
-        }
-    };
-
-//    /**
+//    /*
 //     * When app goes off screen, unregister the Advertising failure Receiver to stop memory leaks.
 //     * (and because the app doesn't care if Advertising fails while the UI isn't active)
 //     */
