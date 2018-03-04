@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -31,6 +32,10 @@ public class AttendanceChecking extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
     private ArrayList<ScanResult> scanResults;
+    public static BitSet bitmap0 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap1 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap2 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap3 = new BitSet(160); // 20 bytes
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
@@ -91,6 +96,11 @@ public class AttendanceChecking extends AppCompatActivity {
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled
                         checkBTPermissions();
+                        // set page number
+                        bitmap0.set(0);
+                        bitmap1.set(1);
+                        bitmap2.set(2);
+                        bitmap3.set(3);
                         //Start service
                         startScanning();
                     } else {
@@ -261,16 +271,54 @@ public class AttendanceChecking extends AppCompatActivity {
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
 
-                    String[] temp = receivedData.split(" ");
-                    String receivedPageNum = temp[0];
-                    String relayedBitmap = temp[1];
-
-                    // e.g. if it receives page 1, then XOR myBitmap[1] with received Bitmap
-                    if(AdvertiserService.bitmap[Integer.parseInt(receivedPageNum)] == relayedBitmap){
-                        startScanning();
-                    } else {
-                        //TODO: XOR the two bitmaps
+                    // set the relayed bitmap
+                    BitSet relayedBitmap = new BitSet(160);
+                    for (int i = 0; i < 160; i++) {
+                        if (receivedData.charAt(i) == '1') {
+                            relayedBitmap.set(i);
+                        }
                     }
+
+                    // check the page number
+                    if(bitmap0.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap0;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap0)){
+                            startScanning();
+                        } else {
+                            // the two bitmaps are different, xor the parts other than page number
+                            bitmap0.get(4,160).xor(relayedBitmap.get(4,160));
+                        }
+                    } else if (bitmap1.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap1;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap1)){
+                            startScanning();
+                        } else {
+                            bitmap1.get(4,160).xor(relayedBitmap.get(4,160));
+                        }
+                    } else if (bitmap2.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap2;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap2)){
+                            startScanning();
+                        } else {
+                            bitmap2.get(4,160).xor(relayedBitmap.get(4,160));
+                        }
+                    } else if (bitmap3.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap3;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap3)){
+                            startScanning();
+                        } else {
+                            bitmap3.get(4,160).xor(relayedBitmap.get(4,160));
+                        }
+                    }
+
                     String totalNumber = " " + scanResults.size() + " ";
                     totalNumTextView.setText(totalNumber);
                 } catch (Resources.NotFoundException e) {

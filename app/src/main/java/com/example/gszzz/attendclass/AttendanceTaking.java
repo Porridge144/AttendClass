@@ -24,6 +24,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.BitSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +42,10 @@ public class AttendanceTaking extends AppCompatActivity {
     private ArrayList<ScanResult> scanResults;
     public String pageNum;
     public boolean restIndicator = false;
+    public static BitSet bitmap0 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap1 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap2 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap3 = new BitSet(160); // 20 bytes
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
     long startTime = 0;
@@ -66,28 +71,28 @@ public class AttendanceTaking extends AppCompatActivity {
                 pageNum = "0";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + AdvertiserService.bitmap[0]);
+                dataTextView.setText("Data is " + bitmap0.toString());
             } else if (seconds == 2 && !restIndicator){
                 // 2~3s
                 stopAdvertising();
                 pageNum = "1";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + AdvertiserService.bitmap[1]);
+                dataTextView.setText("Data is " + bitmap1.toString());
             } else if (seconds == 3 && !restIndicator){
                 // 3~4s
                 stopAdvertising();
                 pageNum = "2";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + AdvertiserService.bitmap[2]);
+                dataTextView.setText("Data is " + bitmap2.toString());
             } else if (seconds == 4 && !restIndicator){
                 // 4~5s
                 stopAdvertising();
                 pageNum = "3";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + AdvertiserService.bitmap[3]);
+                dataTextView.setText("Data is " + bitmap3.toString());
             } else if (seconds == 5) {
                 // from 5s onwards
                 stopAdvertising();
@@ -131,6 +136,12 @@ public class AttendanceTaking extends AppCompatActivity {
                     // Prompt user to turn on Bluetooth (logic continues in onActivityResult()).
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
+
+                    bitmap0.set(0);
+                    bitmap1.set(1);
+                    bitmap2.set(2);
+                    bitmap3.set(3);
+                    bitmap0.set(15); // make this student to be No. 12 student
                 }
             } else {
 
@@ -237,17 +248,61 @@ public class AttendanceTaking extends AppCompatActivity {
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
 
-                    String[] temp = receivedData.split(" ");
-                    String receivedPageNum = temp[0];
-                    String relayedBitmap = temp[1];
+                    // set the relayed bitmap
+                    BitSet relayedBitmap = new BitSet(160);
+                    for (int i = 0; i < 160; i++) {
+                        if (receivedData.charAt(i) == '1') {
+                            relayedBitmap.set(i);
+                        }
+                    }
+                    String relayedPageNumber = relayedBitmap.get(0,3).toString();
 
-                    // e.g. if it receives page 1, then XOR myBitmap[1] with received Bitmap
-                    if(AdvertiserService.bitmap[Integer.parseInt(receivedPageNum)] == relayedBitmap){
-                        restIndicator = true;
-                        startScanning();
-                    } else {
-                        restIndicator = false;
-                        //TODO: XOR the two bitmaps
+                    // check the page number
+                    if(bitmap0.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap0;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap0)){
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                        // the two bitmaps are different, xor the parts other than page number
+                            bitmap0.get(4,160).xor(relayedBitmap.get(4,160));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    } else if (bitmap1.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap1;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap1)){
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                            bitmap1.get(4,160).xor(relayedBitmap.get(4,160));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    } else if (bitmap2.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap2;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap2)){
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                            bitmap2.get(4,160).xor(relayedBitmap.get(4,160));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    } else if (bitmap3.get(0,3) == relayedBitmap.get(0,3)){
+                        BitSet temp = bitmap3;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap3)){
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                            bitmap3.get(4,160).xor(relayedBitmap.get(4,160));
+                            startAdvertising(relayedPageNumber);
+                        }
                     }
 
                 } catch (Resources.NotFoundException e) {

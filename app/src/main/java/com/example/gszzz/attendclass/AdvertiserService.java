@@ -20,6 +20,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -44,8 +45,7 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
-    public static String[] bitmap = {"0 0000", "1 0001", "2 0010", "3 0011"};
-    private String advertisingData;
+    private byte[] advertisingData;
     private String instruction;
 
     private static final String TAG = "AdvertiserService";
@@ -66,19 +66,19 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         instruction = intent.getStringExtra("Instruction");
-        if(instruction.equals("0")){
-            advertisingData = bitmap[0];
+        if(instruction.equals("1000")){
+            advertisingData = AttendanceTaking.bitmap0.toByteArray();
         }
-        if(instruction.equals("1")){
-            advertisingData = bitmap[1];
+        if(instruction.equals("0100")){
+            advertisingData = AttendanceTaking.bitmap1.toByteArray();
         }
-        if(instruction.equals("2")){
-            advertisingData = bitmap[2];
+        if(instruction.equals("0010")){
+            advertisingData = AttendanceTaking.bitmap2.toByteArray();
         }
-        if(instruction.equals("3")){
-            advertisingData = bitmap[3];
+        if(instruction.equals("0001")){
+            advertisingData = AttendanceTaking.bitmap3.toByteArray();
         }
-        Toast.makeText(this, advertisingData, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, advertisingData.toString(), Toast.LENGTH_LONG).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -127,7 +127,7 @@ public class AdvertiserService extends Service {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(false);
-        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
+        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData);
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
         //String failureData = "asdghkajsghalkxcjhfa;sghtalksjcfhalskfjhasldkjfhdskf";
