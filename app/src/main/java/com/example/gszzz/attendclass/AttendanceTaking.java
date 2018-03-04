@@ -68,31 +68,31 @@ public class AttendanceTaking extends AppCompatActivity {
             if (seconds == 1 && !restIndicator){
                 // 1~2s
                 stopScanning();
-                pageNum = "0";
+                pageNum = "1000";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + bitmap0.toString());
+                dataTextView.setText("Data is " + bitmap0.get(4,160).toString());
             } else if (seconds == 2 && !restIndicator){
                 // 2~3s
                 stopAdvertising();
-                pageNum = "1";
+                pageNum = "0100";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + bitmap1.toString());
+                dataTextView.setText("Data is " + bitmap1.get(4,160).toString());
             } else if (seconds == 3 && !restIndicator){
                 // 3~4s
                 stopAdvertising();
-                pageNum = "2";
+                pageNum = "0010";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + bitmap2.toString());
+                dataTextView.setText("Data is " + bitmap2.get(4,160).toString());
             } else if (seconds == 4 && !restIndicator){
                 // 4~5s
                 stopAdvertising();
-                pageNum = "3";
+                pageNum = "0001";
                 startAdvertising(pageNum);
                 moduleLocationTextView.setText("Now is advertising page " + pageNum);
-                dataTextView.setText("Data is " + bitmap3.toString());
+                dataTextView.setText("Data is " + bitmap3.get(4,160).toString());
             } else if (seconds == 5) {
                 // from 5s onwards
                 stopAdvertising();
@@ -100,6 +100,8 @@ public class AttendanceTaking extends AppCompatActivity {
                 moduleLocationTextView.setText("Now is scanning");
                 dataTextView.setText("Not advertising...");
             }
+
+            //TODO: implement the timeout function according to resting time
 
         }
     };
@@ -127,6 +129,12 @@ public class AttendanceTaking extends AppCompatActivity {
                     // Are Bluetooth Advertisements supported on this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
+                        bitmap0.set(0);
+                        bitmap1.set(1);
+                        bitmap2.set(2);
+                        bitmap3.set(3);
+                        bitmap0.set(15); // make this student to be No. 12 student
+
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -136,12 +144,6 @@ public class AttendanceTaking extends AppCompatActivity {
                     // Prompt user to turn on Bluetooth (logic continues in onActivityResult()).
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
-
-                    bitmap0.set(0);
-                    bitmap1.set(1);
-                    bitmap2.set(2);
-                    bitmap3.set(3);
-                    bitmap0.set(15); // make this student to be No. 12 student
                 }
             } else {
 
@@ -189,12 +191,6 @@ public class AttendanceTaking extends AppCompatActivity {
         scanResults = new ArrayList<>();
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
-
-        //TODO: if it's scanning something, note down the label number it hears
-//        if (ScannerService.running){
-//
-//        }
-
     }
 
     @Override
@@ -264,6 +260,7 @@ public class AttendanceTaking extends AppCompatActivity {
                         // the two bitmaps are same
                         if (temp.equals(bitmap0)){
                             restIndicator = true;
+                            // TODO: record the time when it rests
                             startScanning();
                         } else {
                         // the two bitmaps are different, xor the parts other than page number

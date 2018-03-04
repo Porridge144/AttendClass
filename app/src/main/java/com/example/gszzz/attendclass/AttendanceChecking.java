@@ -318,7 +318,6 @@ public class AttendanceChecking extends AppCompatActivity {
                             bitmap3.get(4,160).xor(relayedBitmap.get(4,160));
                         }
                     }
-
                     String totalNumber = " " + scanResults.size() + " ";
                     totalNumTextView.setText(totalNumber);
                 } catch (Resources.NotFoundException e) {
