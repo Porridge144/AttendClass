@@ -32,10 +32,10 @@ public class AttendanceChecking extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
     private ArrayList<ScanResult> scanResults;
-    public static BitSet bitmap0 = new BitSet(160); // 20 bytes
-    public static BitSet bitmap1 = new BitSet(160); // 20 bytes
-    public static BitSet bitmap2 = new BitSet(160); // 20 bytes
-    public static BitSet bitmap3 = new BitSet(160); // 20 bytes
+    public static BitSet bitmap0 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
+    public static BitSet bitmap1 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
+    public static BitSet bitmap2 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
+    public static BitSet bitmap3 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
@@ -49,6 +49,16 @@ public class AttendanceChecking extends AppCompatActivity {
         totalNumTextView = (TextView) findViewById(R.id.totalNumTextView);
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
+
+        // set page number
+        bitmap0.clear();
+        bitmap1.clear();
+        bitmap2.clear();
+        bitmap3.clear();
+        bitmap0.set(0);
+        bitmap1.set(1);
+        bitmap2.set(2);
+        bitmap3.set(3);
 
         scanningFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -96,11 +106,6 @@ public class AttendanceChecking extends AppCompatActivity {
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled
                         checkBTPermissions();
-                        // set page number
-                        bitmap0.set(0);
-                        bitmap1.set(1);
-                        bitmap2.set(2);
-                        bitmap3.set(3);
                         //Start service
                         startScanning();
                     } else {
@@ -272,8 +277,8 @@ public class AttendanceChecking extends AppCompatActivity {
                     String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
 
                     // set the relayed bitmap
-                    BitSet relayedBitmap = new BitSet(160);
-                    for (int i = 0; i < 160; i++) {
+                    BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+                    for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
                         if (receivedData.charAt(i) == '1') {
                             relayedBitmap.set(i);
                         }
@@ -288,7 +293,7 @@ public class AttendanceChecking extends AppCompatActivity {
                             startScanning();
                         } else {
                             // the two bitmaps are different, xor the parts other than page number
-                            bitmap0.get(4,160).xor(relayedBitmap.get(4,160));
+                            bitmap0.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
                         }
                     } else if (bitmap1.get(0,3) == relayedBitmap.get(0,3)){
                         BitSet temp = bitmap1;
@@ -297,7 +302,7 @@ public class AttendanceChecking extends AppCompatActivity {
                         if (temp.equals(bitmap1)){
                             startScanning();
                         } else {
-                            bitmap1.get(4,160).xor(relayedBitmap.get(4,160));
+                            bitmap1.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
                         }
                     } else if (bitmap2.get(0,3) == relayedBitmap.get(0,3)){
                         BitSet temp = bitmap2;
@@ -306,7 +311,7 @@ public class AttendanceChecking extends AppCompatActivity {
                         if (temp.equals(bitmap2)){
                             startScanning();
                         } else {
-                            bitmap2.get(4,160).xor(relayedBitmap.get(4,160));
+                            bitmap2.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
                         }
                     } else if (bitmap3.get(0,3) == relayedBitmap.get(0,3)){
                         BitSet temp = bitmap3;
@@ -315,7 +320,7 @@ public class AttendanceChecking extends AppCompatActivity {
                         if (temp.equals(bitmap3)){
                             startScanning();
                         } else {
-                            bitmap3.get(4,160).xor(relayedBitmap.get(4,160));
+                            bitmap3.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
                         }
                     }
                     String totalNumber = " " + scanResults.size() + " ";

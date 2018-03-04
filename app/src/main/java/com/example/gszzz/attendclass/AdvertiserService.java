@@ -20,6 +20,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,19 +67,19 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         instruction = intent.getStringExtra("Instruction");
-        if(instruction.equals("1000")){
+        if(instruction.equals(AttendanceTaking.bitmap0.get(0,3).toString())){
             advertisingData = AttendanceTaking.bitmap0.toByteArray();
         }
-        if(instruction.equals("0100")){
+        else if(instruction.equals(AttendanceTaking.bitmap1.get(0,3).toString())){
             advertisingData = AttendanceTaking.bitmap1.toByteArray();
         }
-        if(instruction.equals("0010")){
+        else if(instruction.equals(AttendanceTaking.bitmap2.get(0,3).toString())){
             advertisingData = AttendanceTaking.bitmap2.toByteArray();
         }
-        if(instruction.equals("0001")){
+        else if(instruction.equals(AttendanceTaking.bitmap3.get(0,3).toString())){
             advertisingData = AttendanceTaking.bitmap3.toByteArray();
         }
-        Toast.makeText(this, advertisingData.toString(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, Arrays.toString(advertisingData), Toast.LENGTH_LONG).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
     }
