@@ -46,7 +46,8 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
-    private byte[] advertisingData;
+//    private byte[] advertisingData;
+    private String advertisingData;
     private String instruction;
 
     private static final String TAG = "AdvertiserService";
@@ -66,20 +67,20 @@ public class AdvertiserService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        instruction = intent.getStringExtra("Instruction");
-        if(instruction.equals(AttendanceTaking.bitmap0.get(0,2).toString())){
-            advertisingData = AttendanceTaking.bitmap0.toByteArray();
-        }
-        else if(instruction.equals(AttendanceTaking.bitmap1.get(0,2).toString())){
-            advertisingData = AttendanceTaking.bitmap1.toByteArray();
-        }
-        else if(instruction.equals(AttendanceTaking.bitmap2.get(0,2).toString())){
-            advertisingData = AttendanceTaking.bitmap2.toByteArray();
-        }
-        else if(instruction.equals(AttendanceTaking.bitmap3.get(0,2).toString())){
-            advertisingData = AttendanceTaking.bitmap3.toByteArray();
-        }
-        Toast.makeText(this, "Advertised data in value: " + Arrays.toString(advertisingData), Toast.LENGTH_LONG).show();
+//        instruction = intent.getStringExtra("Instruction");
+//        if(instruction.equals(AttendanceTaking.bitmap0.get(0,2).toString())){
+//            advertisingData = AttendanceTaking.bitmap0.toByteArray();
+//        }
+//        else if(instruction.equals(AttendanceTaking.bitmap1.get(0,2).toString())){
+//            advertisingData = AttendanceTaking.bitmap1.toByteArray();
+//        }
+//        else if(instruction.equals(AttendanceTaking.bitmap2.get(0,2).toString())){
+//            advertisingData = AttendanceTaking.bitmap2.toByteArray();
+//        }
+//        else if(instruction.equals(AttendanceTaking.bitmap3.get(0,2).toString())){
+//            advertisingData = AttendanceTaking.bitmap3.toByteArray();
+//        }
+        advertisingData = "zzzzzzz";
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -128,7 +129,8 @@ public class AdvertiserService extends Service {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(false);
-        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData);
+        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
+        Toast.makeText(this, "Advertised data in value: " + advertisingData, Toast.LENGTH_LONG).show();
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
         //String failureData = "asdghkajsghalkxcjhfa;sghtalksjcfhalskfjhasldkjfhdskf";
