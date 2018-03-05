@@ -1,6 +1,7 @@
 package com.example.gszzz.attendclass;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
@@ -13,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -31,6 +34,8 @@ public class AttendanceChecking extends AppCompatActivity {
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
+    private TextView bitmapTextView;
+    private TextView timerTextView;
     private ArrayList<ScanResult> scanResults;
     public static BitSet bitmap0 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
     public static BitSet bitmap1 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
@@ -39,6 +44,46 @@ public class AttendanceChecking extends AppCompatActivity {
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
 
+    long startTime = 0;
+
+    //runs without a timer by reposting this handler at the end of the runnable
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @SuppressLint({"SetTextI18n", "DefaultLocale"})
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            timerTextView.setText(String.format("%d:%02d", minutes, seconds));
+
+            timerHandler.postDelayed(this, 500);
+
+            if (seconds%2==0 ){
+                StringBuilder s = new StringBuilder();
+                for (int i = 2; i < bitmap0.size()-2; i++) {
+                    s.append(bitmap0.get(i) ? "1" : "0");
+                }
+                for (int i = 2; i < bitmap1.size()-2; i++) {
+                    s.append(bitmap1.get(i) ? "1" : "0");
+                }
+                for (int i = 2; i < bitmap2.size()-2; i++) {
+                    s.append(bitmap2.get(i) ? "1" : "0");
+                }
+                for (int i = 2; i < bitmap3.size()-2; i++) {
+                    s.append(bitmap3.get(i) ? "1" : "0");
+                }
+                bitmapTextView.setText(s.toString());
+            }
+
+            //TODO: implement the timeout function according to resting time
+
+        }
+    };
+
     @Override
     @RequiresApi(api = Build.VERSION_CODES.M)
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +91,21 @@ public class AttendanceChecking extends AppCompatActivity {
         setContentView(R.layout.activity_attendance_checking);
 
         scanResults = new ArrayList<>();
-        totalNumTextView = (TextView) findViewById(R.id.totalNumTextView);
+        totalNumTextView = findViewById(R.id.totalNumTextView);
+        timerTextView = findViewById(R.id.textView6);
+        bitmapTextView = findViewById(R.id.textView5);
+
+        startTime = System.currentTimeMillis();
+        timerHandler.postDelayed(timerRunnable, 0);
+
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
 
         // set page number
-        bitmap0.clear();
-        bitmap1.clear();
-        bitmap2.clear();
-        bitmap3.clear();
-        bitmap0.set(0);
-        bitmap1.set(1);
-        bitmap2.set(2);
-        bitmap3.set(3);
+        bitmap1.set(0);
+        bitmap2.set(1);
+        bitmap3.set(0);
+        bitmap3.set(1);
 
         scanningFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -105,7 +152,7 @@ public class AttendanceChecking extends AppCompatActivity {
                     // Are Bluetooth Advertisements supported on this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled
-                        checkBTPermissions();
+//                        checkBTPermissions();
                         //Start service
                         startScanning();
                     } else {
@@ -162,16 +209,6 @@ public class AttendanceChecking extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(scanResultsReceiver);
-        Toast.makeText(getApplicationContext(), "Scanning activity get destroyed....", Toast.LENGTH_SHORT).show();
-        if (ScannerService.running) {
-            stopScanning();
-        }
-    }
-
     private void startScanning() {
         Context c = getApplicationContext();
         c.startService(getScannerServiceIntent(c));
@@ -219,6 +256,20 @@ public class AttendanceChecking extends AppCompatActivity {
         return intent;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(scanResultsReceiver);
+        timerHandler.removeCallbacks(timerRunnable);
+        Toast.makeText(getApplicationContext(), "Scanning activity get destroyed....", Toast.LENGTH_SHORT).show();
+        if (ScannerService.running) {
+            stopScanning();
+        }
+        if (AdvertiserService.running){
+            stopAdvertising();
+        }
+    }
+
     /**
      * When app comes on screen, check if BLE Advertisements are running, set switch accordingly,
      * and register the Receiver to be notified if Advertising fails.
@@ -237,6 +288,7 @@ public class AttendanceChecking extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        timerHandler.removeCallbacks(timerRunnable);
         unregisterReceiver(scanningFailureReceiver);
     }
 
@@ -274,18 +326,19 @@ public class AttendanceChecking extends AppCompatActivity {
                     scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
 
                     List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
-                    String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
+                    byte[] receivedData = scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0));
 
                     // set the relayed bitmap
                     BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-                    for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                        if (receivedData.charAt(i) == '1') {
+                    for (int i = 0; i < receivedData.length * 8; i++) {
+                        if ((receivedData[receivedData.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
                             relayedBitmap.set(i);
                         }
                     }
+                    String relayedPageNumber = relayedBitmap.get(0,2).toString();
 
                     // check the page number
-                    if(bitmap0.get(0,3) == relayedBitmap.get(0,3)){
+                    if(bitmap0.get(0,2) == relayedBitmap.get(0,2)){
                         BitSet temp = bitmap0;
                         temp.or(relayedBitmap);
                         // the two bitmaps are same
@@ -293,34 +346,34 @@ public class AttendanceChecking extends AppCompatActivity {
                             startScanning();
                         } else {
                             // the two bitmaps are different, xor the parts other than page number
-                            bitmap0.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
+                            bitmap0.get(2,Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2,Constants.MAX_NUMBER_OF_BITS));
                         }
-                    } else if (bitmap1.get(0,3) == relayedBitmap.get(0,3)){
+                    } else if (bitmap1.get(0,2) == relayedBitmap.get(0,2)){
                         BitSet temp = bitmap1;
                         temp.or(relayedBitmap);
                         // the two bitmaps are same
                         if (temp.equals(bitmap1)){
                             startScanning();
                         } else {
-                            bitmap1.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
+                            bitmap1.get(2,Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2,Constants.MAX_NUMBER_OF_BITS));
                         }
-                    } else if (bitmap2.get(0,3) == relayedBitmap.get(0,3)){
+                    } else if (bitmap2.get(0,2) == relayedBitmap.get(0,2)){
                         BitSet temp = bitmap2;
                         temp.or(relayedBitmap);
                         // the two bitmaps are same
                         if (temp.equals(bitmap2)){
                             startScanning();
                         } else {
-                            bitmap2.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
+                            bitmap2.get(2,Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2,Constants.MAX_NUMBER_OF_BITS));
                         }
-                    } else if (bitmap3.get(0,3) == relayedBitmap.get(0,3)){
+                    } else if (bitmap3.get(0,2) == relayedBitmap.get(0,2)){
                         BitSet temp = bitmap3;
                         temp.or(relayedBitmap);
                         // the two bitmaps are same
                         if (temp.equals(bitmap3)){
                             startScanning();
                         } else {
-                            bitmap3.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
+                            bitmap3.get(2,Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2,Constants.MAX_NUMBER_OF_BITS));
                         }
                     }
                     String totalNumber = " " + scanResults.size() + " ";

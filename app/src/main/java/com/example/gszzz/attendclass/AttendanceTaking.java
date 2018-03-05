@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 //import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.AdvertiseCallback;
 import android.content.BroadcastReceiver;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 //import java.util.concurrent.ExecutionException;
 
 public class AttendanceTaking extends AppCompatActivity {
@@ -43,10 +45,10 @@ public class AttendanceTaking extends AppCompatActivity {
     private TextView dataTextView;
     private ArrayList<ScanResult> scanResults;
     public boolean restIndicator = false;
-    public static BitSet bitmap0 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
-    public static BitSet bitmap1 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
-    public static BitSet bitmap2 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
-    public static BitSet bitmap3 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
+    public static BitSet bitmap0 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    public static BitSet bitmap1 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    public static BitSet bitmap2 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    public static BitSet bitmap3 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
 
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
     long startTime = 0;
@@ -67,50 +69,50 @@ public class AttendanceTaking extends AppCompatActivity {
 
             timerHandler.postDelayed(this, 500);
 
-            if (seconds == 1 && !restIndicator){
-                // 1~3s, page 1000
+            if (seconds == 1 && !restIndicator) {
+                // 1~3s, page 00
                 stopScanning();
-                startAdvertising(bitmap0.get(0,3).toString());
-                moduleLocationTextView.setText("Now is advertising page 0");
+                startAdvertising(bitmap0.get(0, 2).toString());
+                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap0.get(0, 2).toByteArray()));
                 StringBuilder s = new StringBuilder();
-                for( int i = 0; i < bitmap0.size();  i++ ) {
-                    s.append(bitmap0.get(i) ? "1": "0" );
+                for (int i = 0; i < bitmap0.size(); i++) {
+                    s.append(bitmap0.get(i) ? "1" : "0");
                 }
                 dataTextView.setText(s);
-            } else if (seconds == 3 && !restIndicator){
-                // 3~5s, page 0100
+            } else if (seconds == 3 && !restIndicator) {
+                // 3~5s, page 10
                 stopAdvertising();
-                startAdvertising(bitmap1.get(0,3).toString());
-                moduleLocationTextView.setText("Now is advertising page 1");
+                startAdvertising(bitmap1.get(0, 2).toString());
+                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap1.get(0, 2).toByteArray()));
                 StringBuilder s = new StringBuilder();
-                for( int i = 0; i < bitmap1.size();  i++ ) {
-                    s.append(bitmap1.get(i) ? "1": "0" );
+                for (int i = 0; i < bitmap1.size(); i++) {
+                    s.append(bitmap1.get(i) ? "1" : "0");
                 }
                 dataTextView.setText(s.toString());
 //                dataTextView.setText(Arrays.toString(bitmap1.get(4,Constants.MAX_NUMBER_OF_BITS-1).toByteArray()));
-            } else if (seconds == 5 && !restIndicator){
-                // 5~7s, page 0010
+            } else if (seconds == 5 && !restIndicator) {
+                // 5~7s, page 01
                 stopAdvertising();
-                startAdvertising(bitmap2.get(0,3).toString());
-                moduleLocationTextView.setText("Now is advertising page 2");
+                startAdvertising(bitmap2.get(0, 2).toString());
+                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap2.get(0, 2).toByteArray()));
                 StringBuilder s = new StringBuilder();
-                for( int i = 0; i < bitmap2.size();  i++ ) {
-                    s.append(bitmap2.get(i) ? "1": "0" );
+                for (int i = 0; i < bitmap2.size(); i++) {
+                    s.append(bitmap2.get(i) ? "1" : "0");
                 }
                 dataTextView.setText(s.toString());
 //                dataTextView.setText(Arrays.toString(bitmap2.get(4,Constants.MAX_NUMBER_OF_BITS-1).toByteArray()));
-            } else if (seconds == 7 && !restIndicator){
-                // 7~9s, page 0001
+            } else if (seconds == 7 && !restIndicator) {
+                // 7~9s, page 11
                 stopAdvertising();
-                startAdvertising(bitmap3.get(0,3).toString());
-                moduleLocationTextView.setText("Now is advertising page 3");
+                startAdvertising(bitmap3.get(0, 2).toString());
+                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap3.get(0, 2).toByteArray()));
                 StringBuilder s = new StringBuilder();
-                for( int i = 0; i < bitmap3.size();  i++ ) {
-                    s.append(bitmap3.get(i) ? "1": "0" );
+                for (int i = 0; i < bitmap3.size(); i++) {
+                    s.append(bitmap3.get(i) ? "1" : "0");
                 }
                 dataTextView.setText(s.toString());
 //                dataTextView.setText(Arrays.toString(bitmap3.get(4,Constants.MAX_NUMBER_OF_BITS-1).toByteArray()));
-            } else if (seconds == 9) {
+            } else if (seconds == 9 || restIndicator) {
                 // from 9s onwards
                 stopAdvertising();
                 startScanning();
@@ -124,57 +126,45 @@ public class AttendanceTaking extends AppCompatActivity {
     };
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.M)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_taking);
 
-        labelTextView = (TextView) findViewById(R.id.textView4);
-        dataTextView = (TextView) findViewById(R.id.textView3);
-        moduleLocationTextView = (TextView) findViewById(R.id.moduleLocation);
+        labelTextView = findViewById(R.id.textView4);
+        dataTextView = findViewById(R.id.textView3);
+        moduleLocationTextView = findViewById(R.id.moduleLocation);
+
+        startTime = System.currentTimeMillis();
+        timerHandler.postDelayed(timerRunnable, 0);
 
         //set page number
-//        bitmap0.clear();
-//        bitmap1.clear();
-//        bitmap2.clear();
-//        bitmap3.clear();
-        bitmap0.set(0);
-        bitmap1.set(1);
-        bitmap2.set(2);
-        bitmap3.set(3);
-        bitmap1.set(6); // register the student in bitmap
+        bitmap1.set(0);
+        bitmap2.set(1);
+        bitmap3.set(0);
+        bitmap3.set(1);
 
-
-        if (savedInstanceState == null) {
-
-            mBluetoothAdapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE))
-                    .getAdapter();
-
-            // Is Bluetooth supported on this device?
-            if (mBluetoothAdapter != null) {
-
-                // Is Bluetooth turned on?
-                if (mBluetoothAdapter.isEnabled()) {
-
-                    // Are Bluetooth Advertisements supported on this device?
-                    if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
-                        // Everything is supported and enabled...
-
-                    } else {
-
-                        // Bluetooth Advertisements are not supported.
-                        Toast.makeText(getApplicationContext(), R.string.bluetooth_advertisment_not_supported, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    // Prompt user to turn on Bluetooth (logic continues in onActivityResult()).
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
-                }
-            } else {
-
-                // Bluetooth is not supported.
-                Toast.makeText(getApplicationContext(), R.string.bluetooth_not_supported, Toast.LENGTH_LONG).show();
-            }
+        int randomPage = ThreadLocalRandom.current().nextInt(0, 4);
+        int randomNum = ThreadLocalRandom.current().nextInt(2, Constants.MAX_NUMBER_OF_BITS);
+        switch (randomPage) {
+            case (0):
+                bitmap0.set(randomNum);
+                break;
+            case (1):
+                bitmap1.set(randomNum);
+                break;
+            case (2):
+                bitmap2.set(randomNum);
+                break;
+            case (3):
+                bitmap3.set(randomNum);
+                break;
+            default:
         }
+
+        scanResults = new ArrayList<>();
+        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+        registerReceiver(scanResultsReceiver, filter);
 
         advertisingFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -209,12 +199,66 @@ public class AttendanceTaking extends AppCompatActivity {
             }
         };
 
-        startTime = System.currentTimeMillis();
-        timerHandler.postDelayed(timerRunnable, 0);
+        scanningFailureReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int errorCode = intent.getIntExtra(ScannerService.SCANNING_FAILED_EXTRA_CODE, -1);
 
-        scanResults = new ArrayList<>();
-        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-        registerReceiver(scanResultsReceiver, filter);
+                String errorMessage = getString(R.string.start_error_prefix);
+                switch (errorCode) {
+                    case ScanCallback.SCAN_FAILED_ALREADY_STARTED:
+                        errorMessage += " " + getString(R.string.start_error_already_started);
+                        break;
+                    case ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED:
+                        errorMessage += " " + getString(R.string.start_error_unsupported);
+                        break;
+                    case ScanCallback.SCAN_FAILED_INTERNAL_ERROR:
+                        errorMessage += " " + getString(R.string.start_error_internal);
+                        break;
+                    case ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
+                        errorMessage += " " + getString(R.string.start_error_registration_failed);
+                        break;
+                    case ScannerService.SCANNING_TIMED_OUT:
+                        errorMessage = " " + getString(R.string.scanning_time_out);
+                        break;
+                    default:
+                        errorMessage += " " + getString(R.string.start_error_unknown);
+                }
+
+                Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+            }
+        };
+
+        if (savedInstanceState == null) {
+
+            mBluetoothAdapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+
+            // Is Bluetooth supported on this device?
+            if (mBluetoothAdapter != null) {
+
+                // Is Bluetooth turned on?
+                if (mBluetoothAdapter.isEnabled()) {
+
+                    // Are Bluetooth Advertisements supported on this device?
+                    if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
+                        // Everything is supported and enabled...
+
+                    } else {
+
+                        // Bluetooth Advertisements are not supported.
+                        Toast.makeText(getApplicationContext(), R.string.bluetooth_advertisment_not_supported, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    // Prompt user to turn on Bluetooth (logic continues in onActivityResult()).
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
+                }
+            } else {
+
+                // Bluetooth is not supported.
+                Toast.makeText(getApplicationContext(), R.string.bluetooth_not_supported, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -229,7 +273,6 @@ public class AttendanceTaking extends AppCompatActivity {
                     // this device?
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
-
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -257,83 +300,6 @@ public class AttendanceTaking extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "SDK version < LOLIPOP. No need permission check.", Toast.LENGTH_LONG).show();
         }
     }
-
-    private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ScannerService.NEW_DEVICE_FOUND)) {
-                try {
-                    scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
-
-                    List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
-                    String receivedData = new String(scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0)));
-
-                    // set the relayed bitmap
-                    BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-                    for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                        if (receivedData.charAt(i) == '1') {
-                            relayedBitmap.set(i);
-                        }
-                    }
-                    String relayedPageNumber = relayedBitmap.get(0,3).toString();
-
-                    // check the page number
-                    if(bitmap0.get(0,3) == relayedBitmap.get(0,3)){
-                        BitSet temp = bitmap0;
-                        temp.or(relayedBitmap);
-                        // the two bitmaps are same
-                        if (temp.equals(bitmap0)){
-                            restIndicator = true;
-                            // TODO: record the time when it rests
-                            startScanning();
-                        } else {
-                        // the two bitmaps are different, xor the parts other than page number
-                            bitmap0.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
-                            startAdvertising(relayedPageNumber);
-                        }
-                    } else if (bitmap1.get(0,3) == relayedBitmap.get(0,3)){
-                        BitSet temp = bitmap1;
-                        temp.or(relayedBitmap);
-                        // the two bitmaps are same
-                        if (temp.equals(bitmap1)){
-                            restIndicator = true;
-                            startScanning();
-                        } else {
-                            bitmap1.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
-                            startAdvertising(relayedPageNumber);
-                        }
-                    } else if (bitmap2.get(0,3) == relayedBitmap.get(0,3)){
-                        BitSet temp = bitmap2;
-                        temp.or(relayedBitmap);
-                        // the two bitmaps are same
-                        if (temp.equals(bitmap2)){
-                            restIndicator = true;
-                            startScanning();
-                        } else {
-                            bitmap2.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
-                            startAdvertising(relayedPageNumber);
-                        }
-                    } else if (bitmap3.get(0,3) == relayedBitmap.get(0,3)){
-                        BitSet temp = bitmap3;
-                        temp.or(relayedBitmap);
-                        // the two bitmaps are same
-                        if (temp.equals(bitmap3)){
-                            restIndicator = true;
-                            startScanning();
-                        } else {
-                            bitmap3.get(4,Constants.MAX_NUMBER_OF_BITS-1).xor(relayedBitmap.get(4,Constants.MAX_NUMBER_OF_BITS-1));
-                            startAdvertising(relayedPageNumber);
-                        }
-                    }
-
-                } catch (Resources.NotFoundException e) {
-                    Toast.makeText(getApplicationContext(), "AttendanceTaking: NotFoundException...", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "AttendanceTaking: " + e.toString(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    };
 
     /**
      * When app comes on screen, check if BLE Advertisements are running, set switch accordingly,
@@ -364,8 +330,12 @@ public class AttendanceTaking extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver(scanResultsReceiver);
         timerHandler.removeCallbacks(timerRunnable);
-        stopScanning();
-        stopAdvertising();
+        if (ScannerService.running) {
+            stopScanning();
+        }
+        if (AdvertiserService.running){
+            stopAdvertising();
+        }
     }
 
     private void startAdvertising(String pageNumber) {
@@ -417,4 +387,85 @@ public class AttendanceTaking extends AppCompatActivity {
 //        intent.putExtra("message", "Put message here!!");
         return new Intent(c, ScannerService.class);
     }
+
+    private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ScannerService.NEW_DEVICE_FOUND)) {
+                try {
+                    scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
+
+                    List<ParcelUuid> uuidData = scanResults.get(0).getScanRecord().getServiceUuids();
+                    byte[] receivedData = scanResults.get(0).getScanRecord().getServiceData().get(uuidData.get(0));
+
+                    // set the relayed bitmap
+                    BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+                    for (int i = 0; i < receivedData.length * 8; i++) {
+                        if ((receivedData[receivedData.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+                            relayedBitmap.set(i);
+                        }
+                    }
+                    String relayedPageNumber = relayedBitmap.get(0, 2).toString();
+
+                    // check the page number
+                    if (bitmap0.get(0, 2) == relayedBitmap.get(0, 2)) {
+                        BitSet temp = bitmap0;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap0)) {
+                            restIndicator = true;
+                            // TODO: record the time when it rests
+                            startScanning();
+                        } else {
+                            // the two bitmaps are different, xor the parts other than page number
+                            restIndicator = false;
+                            bitmap0.get(2, Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    } else if (bitmap1.get(0, 2) == relayedBitmap.get(0, 2)) {
+                        BitSet temp = bitmap1;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap1)) {
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                            restIndicator = false;
+                            bitmap1.get(2, Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    } else if (bitmap2.get(0, 2) == relayedBitmap.get(0, 2)) {
+                        BitSet temp = bitmap2;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap2)) {
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                            restIndicator = false;
+                            bitmap2.get(2, Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    } else if (bitmap3.get(0, 2) == relayedBitmap.get(0, 2)) {
+                        BitSet temp = bitmap3;
+                        temp.or(relayedBitmap);
+                        // the two bitmaps are same
+                        if (temp.equals(bitmap3)) {
+                            restIndicator = true;
+                            startScanning();
+                        } else {
+                            restIndicator = false;
+                            bitmap3.get(2, Constants.MAX_NUMBER_OF_BITS).xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            startAdvertising(relayedPageNumber);
+                        }
+                    }
+
+                } catch (Resources.NotFoundException e) {
+                    Toast.makeText(getApplicationContext(), "AttendanceTaking: NotFoundException...", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "AttendanceTaking: " + e.toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 }

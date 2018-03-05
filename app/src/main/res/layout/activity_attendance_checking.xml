@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="92dp"
+        android:layout_marginBottom="53dp"
         android:onClick="stopScanningOnClicked"
         android:text="Stop Scanning" />
 
@@ -55,5 +55,23 @@
         android:layout_marginTop="80dp"
         android:text="Hello Professor"
         android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView6"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp"
+        android:text="Bitmap" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/furtherInfo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="11dp"
+        android:text="TextView" />
 
 </RelativeLayout>

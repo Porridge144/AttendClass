@@ -7,5 +7,5 @@ public class Constants {
 
     public static final int REQUEST_ENABLE_BT = 1;
 
-    public static final int MAX_NUMBER_OF_BITS = 32;
+    public static final int MAX_NUMBER_OF_BITS = 8 * 10;  // 10 bytes
 }
