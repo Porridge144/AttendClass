@@ -8,11 +8,8 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
@@ -46,9 +43,7 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
-//    private byte[] advertisingData;
-    private String advertisingData;
-    private String instruction;
+    private byte[] advertisingData = {};
 
     private static final String TAG = "AdvertiserService";
 
@@ -67,20 +62,23 @@ public class AdvertiserService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        instruction = intent.getStringExtra("Instruction");
-//        if(instruction.equals(AttendanceTaking.bitmap0.get(0,2).toString())){
-//            advertisingData = AttendanceTaking.bitmap0.toByteArray();
-//        }
-//        else if(instruction.equals(AttendanceTaking.bitmap1.get(0,2).toString())){
-//            advertisingData = AttendanceTaking.bitmap1.toByteArray();
-//        }
-//        else if(instruction.equals(AttendanceTaking.bitmap2.get(0,2).toString())){
-//            advertisingData = AttendanceTaking.bitmap2.toByteArray();
-//        }
-//        else if(instruction.equals(AttendanceTaking.bitmap3.get(0,2).toString())){
-//            advertisingData = AttendanceTaking.bitmap3.toByteArray();
-//        }
-        advertisingData = "zzzzzzz";
+        String instruction = intent.getStringExtra("Instruction");
+        if(instruction.equals(AttendanceTaking.bitmap0.get(0,2).toString())){
+//            Toast.makeText(getApplicationContext(), "page 0", Toast.LENGTH_SHORT).show();
+            advertisingData = AttendanceTaking.bitmap0.toByteArray();
+        }
+        else if(instruction.equals(AttendanceTaking.bitmap1.get(0,2).toString())){
+//            Toast.makeText(getApplicationContext(), "page 1", Toast.LENGTH_SHORT).show();
+            advertisingData = AttendanceTaking.bitmap1.toByteArray();
+        }
+        else if(instruction.equals(AttendanceTaking.bitmap2.get(0,2).toString())){
+//            Toast.makeText(getApplicationContext(), "page 2", Toast.LENGTH_SHORT).show();
+            advertisingData = AttendanceTaking.bitmap2.toByteArray();
+        }
+        else if(instruction.equals(AttendanceTaking.bitmap3.get(0,2).toString())){
+//            Toast.makeText(getApplicationContext(), "page 3", Toast.LENGTH_SHORT).show();
+            advertisingData = AttendanceTaking.bitmap3.toByteArray();
+        }
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -129,8 +127,8 @@ public class AdvertiserService extends Service {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(false);
-        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData.getBytes());
-        Toast.makeText(this, "Advertised data in value: " + advertisingData, Toast.LENGTH_LONG).show();
+        dataBuilder.addServiceData(Constants.Service_UUID, advertisingData);
+//        Toast.makeText(this, "Advertised data in value: " + advertisingData, Toast.LENGTH_LONG).show();
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
         //String failureData = "asdghkajsghalkxcjhfa;sghtalksjcfhalskfjhasldkjfhdskf";

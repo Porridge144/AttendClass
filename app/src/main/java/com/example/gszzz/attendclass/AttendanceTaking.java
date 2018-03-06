@@ -15,6 +15,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
@@ -22,7 +23,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-//import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,11 +51,8 @@ public class AttendanceTaking extends AppCompatActivity {
     public static BitSet bitmap3 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     long startTime = 0;
 
-    //runs without a timer by reposting this handler at the end of the runnable
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
-
-        @SuppressLint({"SetTextI18n", "DefaultLocale"})
         @Override
         public void run() {
             long millis = System.currentTimeMillis() - startTime;
@@ -66,72 +63,76 @@ public class AttendanceTaking extends AppCompatActivity {
             labelTextView.setText(String.format("%d:%02d", minutes, seconds));
 
             timerHandler.postDelayed(this, 500);
-
-            if (!restIndicator) {
-                // 1~3s, page 00
-                if(ScannerService.running) {
-                    stopScanning();
-                }
-                startAdvertising(bitmap0.get(0, 2).toString());
-                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap0.get(0, 2).toByteArray()));
-                StringBuilder s = new StringBuilder();
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap0.get(i) ? "1" : "0");
-                }
-                dataTextView.setText(s.toString());
-                timerHandler.postDelayed(this, 2000);
-            }
-            if (!restIndicator) {
-                // 3~5s, page 10
-                stopAdvertising();
-                startAdvertising(bitmap1.get(0, 2).toString());
-                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap1.get(0, 2).toByteArray()));
-                StringBuilder s = new StringBuilder();
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap1.get(i) ? "1" : "0");
-                }
-                dataTextView.setText(s.toString());
-                timerHandler.postDelayed(this, 2000);
-            }
-            if (!restIndicator) {
-                // 5~7s, page 01
-                stopAdvertising();
-                startAdvertising(bitmap2.get(0, 2).toString());
-                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap2.get(0, 2).toByteArray()));
-                StringBuilder s = new StringBuilder();
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap2.get(i) ? "1" : "0");
-                }
-                dataTextView.setText(s.toString());
-                timerHandler.postDelayed(this, 2000);
-            }
-            if (!restIndicator) {
-                // 7~9s, page 11
-                stopAdvertising();
-                startAdvertising(bitmap3.get(0, 2).toString());
-                moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap3.get(0, 2).toByteArray()));
-                StringBuilder s = new StringBuilder();
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap3.get(i) ? "1" : "0");
-                }
-                dataTextView.setText(s.toString());
-                timerHandler.postDelayed(this, 2000);
-            }
-            if (restIndicator) {
-                // from 9s onwards
-                if (AdvertiserService.running) {
-                    stopAdvertising();
-                }
-                startScanning();
-                moduleLocationTextView.setText("Now is scanning");
-                dataTextView.setText("Not advertising...");
-                timerHandler.postDelayed(this, 22*1000);
-            }
-
-            //TODO: implement the timeout function according to resting time
-
         }
     };
+
+    // Create the Handler object (on the main thread by default)
+    final Handler handler = new Handler();
+    // Define the code block to be executed
+    final Runnable runnableCode = new Runnable() {
+        @Override
+        public void run() {
+            Log.i("Handlers", "Called on main thread");
+            CountDownTimer countDownTimer = new AttendanceTaking.CDT(this, handler);
+            Log.i("Handlers", "CDT Start");
+            countDownTimer.start();
+        }
+    };
+
+    private class CDT extends CountDownTimer {
+        private Runnable e;
+        private Handler h;
+        boolean advertisePeriodEnd = false;
+        CDT(Runnable ext, Handler han){
+            super(30*1000, 2000);
+            this.e = ext;
+            this.h = han;
+        }
+
+        @Override
+        public void onTick(long millisUntilFinish) {
+            double range = 0.2;
+            double secondsUntilFinish = (millisUntilFinish / 1000.0);
+
+            // no difference in bitmap; can rest
+            if (restIndicator){
+                Log.i(TAG,"onTick scan");
+                if (AdvertiserService.running){
+                    stopAdvertising();
+                }
+                // if the scanner service is not running yet
+                if (!ScannerService.running){
+                    taskScan();
+                }
+            }
+            // there is difference in bitmap; need to advertise
+            else{
+                if (( secondsUntilFinish < 28.0 + range) & (secondsUntilFinish > 28.0 - range)) {
+                    advertisePeriodEnd = false;
+                    taskPage00();
+                } else if (( secondsUntilFinish < 26.0 + range) & (secondsUntilFinish > 26.0 - range)) {
+                    advertisePeriodEnd = false;
+                    taskPage10();
+                } else if (( secondsUntilFinish < 24.0 + range) & (secondsUntilFinish > 24.0 - range)) {
+                    advertisePeriodEnd = false;
+                    taskPage01();
+                } else if (( secondsUntilFinish < 22.0 + range) & (secondsUntilFinish > 22.0 - range)) {
+                    Log.i(TAG,"here");
+                    taskPage11();
+                    advertisePeriodEnd = true;
+                } else if (advertisePeriodEnd){
+                    if (!ScannerService.running){
+                        taskScan();
+                    }
+                }
+            }
+        }
+        @Override
+        public void onFinish() {
+            h.post(e);
+//            Log.i("Handlers", "Finish");
+        }
+    }
 
     @Override
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -248,7 +249,8 @@ public class AttendanceTaking extends AppCompatActivity {
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
                         startTime = System.currentTimeMillis();
-                        timerHandler.postDelayed(timerRunnable, 0);
+                        timerHandler.post(timerRunnable);
+                        handler.post(runnableCode);
 
                     } else {
 
@@ -281,7 +283,8 @@ public class AttendanceTaking extends AppCompatActivity {
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
                         startTime = System.currentTimeMillis();
-                        timerHandler.postDelayed(timerRunnable, 0);
+                        timerHandler.post(timerRunnable);
+                        handler.post(runnableCode);
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -348,6 +351,92 @@ public class AttendanceTaking extends AppCompatActivity {
             stopAdvertising();
         }
     }
+
+    private void taskPage00(){
+        Log.i("Handlers", "taskPage00");
+        if(ScannerService.running) {
+            stopScanning();
+        }
+        if(AdvertiserService.running){
+            stopAdvertising();
+        }
+        startAdvertising(bitmap0.get(0, 2).toString());
+        moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap0.get(0, 2).toByteArray()));
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
+            s.append(bitmap0.get(i) ? "1" : "0");
+        }
+        dataTextView.setText(s.toString());
+        Log.i(TAG,"page 00");
+    }
+
+    private void taskPage10(){
+//        Log.i("Handlers", "taskPage10");
+        if(ScannerService.running) {
+            stopScanning();
+        }
+        if(AdvertiserService.running){
+            stopAdvertising();
+        }
+        startAdvertising(bitmap1.get(0, 2).toString());
+        moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap1.get(0, 2).toByteArray()));
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
+            s.append(bitmap1.get(i) ? "1" : "0");
+        }
+        dataTextView.setText(s.toString());
+        Log.i(TAG,"page 10");
+    }
+
+    private void taskPage01(){
+//        Log.i("Handlers", "taskPage01");
+        if(ScannerService.running) {
+            stopScanning();
+        }
+        if(AdvertiserService.running){
+            stopAdvertising();
+        }
+        startAdvertising(bitmap2.get(0, 2).toString());
+        moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap2.get(0, 2).toByteArray()));
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
+            s.append(bitmap2.get(i) ? "1" : "0");
+        }
+        dataTextView.setText(s.toString());
+        Log.i(TAG,"page 01");
+    }
+
+    private void taskPage11(){
+//        Log.i("Handlers", "taskPage11");
+        if(ScannerService.running) {
+            stopScanning();
+        }
+        if(AdvertiserService.running){
+            stopAdvertising();
+        }
+        startAdvertising(bitmap3.get(0, 2).toString());
+        moduleLocationTextView.setText("Now is advertising page " + Arrays.toString(bitmap3.get(0, 2).toByteArray()));
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
+            s.append(bitmap3.get(i) ? "1" : "0");
+        }
+        dataTextView.setText(s.toString());
+        Log.i(TAG,"page 11");
+    }
+
+    private void taskScan(){
+//        Log.i("Handlers", "taskScan");
+        if(AdvertiserService.running){
+            stopAdvertising();
+        }
+        if(!ScannerService.running) {
+            startScanning();
+        }
+        moduleLocationTextView.setText("Now is scanning");
+        dataTextView.setText("Not advertising...");
+        Log.i(TAG,"scan");
+    }
+
 
     private void startAdvertising(String pageNumber) {
         Context c = getApplicationContext();
@@ -427,12 +516,10 @@ public class AttendanceTaking extends AppCompatActivity {
                         if (temp.isEmpty()) {
                             restIndicator = true;
                             // TODO: record the time when it rests
-//                            startScanning();
                         } else {
                             // the two bitmaps are different, xor the parts other than page number
                             restIndicator = false;
                             bitmap0.or(relayedBitmap);
-//                            startAdvertising(relayedPageNumber);
                         }
                     } else if (bitmap1.get(0, 2).equals(relayedBitmap.get(0, 2))) {
                         BitSet temp = bitmap1;
@@ -441,12 +528,10 @@ public class AttendanceTaking extends AppCompatActivity {
                         if (temp.isEmpty()) {
                             restIndicator = true;
                             // TODO: record the time when it rests
-//                            startScanning();
                         } else {
                             // the two bitmaps are different, xor the parts other than page number
                             restIndicator = false;
                             bitmap1.or(relayedBitmap);
-//                            startAdvertising(relayedPageNumber);
                         }
                     } else if (bitmap2.get(0, 2).equals(relayedBitmap.get(0, 2))) {
                         BitSet temp = bitmap2;
@@ -455,12 +540,10 @@ public class AttendanceTaking extends AppCompatActivity {
                         if (temp.isEmpty()) {
                             restIndicator = true;
                             // TODO: record the time when it rests
-//                            startScanning();
                         } else {
                             // the two bitmaps are different, xor the parts other than page number
                             restIndicator = false;
                             bitmap2.or(relayedBitmap);
-//                            startAdvertising(relayedPageNumber);
                         }
                     } else if (bitmap3.get(0, 2).equals(relayedBitmap.get(0, 2))) {
                         BitSet temp = bitmap3;
@@ -469,12 +552,10 @@ public class AttendanceTaking extends AppCompatActivity {
                         if (temp.isEmpty()) {
                             restIndicator = true;
                             // TODO: record the time when it rests
-//                            startScanning();
                         } else {
                             // the two bitmaps are different, xor the parts other than page number
                             restIndicator = false;
                             bitmap3.or(relayedBitmap);
-//                            startAdvertising(relayedPageNumber);
                         }
                     }
 
