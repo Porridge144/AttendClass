@@ -43,7 +43,7 @@ public class AdvertiserService extends Service {
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
-    private byte[] advertisingData = {};
+    private byte[] advertisingData = null;
 
     private static final String TAG = "AdvertiserService";
 
@@ -63,22 +63,24 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String instruction = intent.getStringExtra("Instruction");
-        if(instruction.equals(AttendanceTaking.bitmap0.get(0,2).toString())){
-//            Toast.makeText(getApplicationContext(), "page 0", Toast.LENGTH_SHORT).show();
-            advertisingData = AttendanceTaking.bitmap0.toByteArray();
+        byte[] bitmap0 = intent.getByteArrayExtra("bitmap0");
+        byte[] bitmap1 = intent.getByteArrayExtra("bitmap1");
+        byte[] bitmap2 = intent.getByteArrayExtra("bitmap2");
+        byte[] bitmap3 = intent.getByteArrayExtra("bitmap3");
+        advertisingData = null;
+        if(instruction.equals("00")){
+            advertisingData = bitmap0;
         }
-        else if(instruction.equals(AttendanceTaking.bitmap1.get(0,2).toString())){
-//            Toast.makeText(getApplicationContext(), "page 1", Toast.LENGTH_SHORT).show();
-            advertisingData = AttendanceTaking.bitmap1.toByteArray();
+        else if(instruction.equals("10")){
+            advertisingData = bitmap1;
         }
-        else if(instruction.equals(AttendanceTaking.bitmap2.get(0,2).toString())){
-//            Toast.makeText(getApplicationContext(), "page 2", Toast.LENGTH_SHORT).show();
-            advertisingData = AttendanceTaking.bitmap2.toByteArray();
+        else if(instruction.equals("01")){
+            advertisingData = bitmap2;
         }
-        else if(instruction.equals(AttendanceTaking.bitmap3.get(0,2).toString())){
-//            Toast.makeText(getApplicationContext(), "page 3", Toast.LENGTH_SHORT).show();
-            advertisingData = AttendanceTaking.bitmap3.toByteArray();
+        else if(instruction.equals("11")){
+            advertisingData = bitmap3;
         }
+        Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
     }
