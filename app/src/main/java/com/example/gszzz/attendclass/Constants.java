@@ -8,4 +8,12 @@ public class Constants {
     public static final int REQUEST_ENABLE_BT = 1;
 
     public static final int MAX_NUMBER_OF_BITS = 6;  // 10 bytes
+
+    public static final int ADVERTISING_INTERVAL = 2; // 2 seconds
+
+    public static final int DURATION = 12; // 10 seconds
+
+    public static final int BIAS = 2; // 2 seconds
+
+    public static final int CLASS_DURATION = 30 * 60; // 30 minutes
 }

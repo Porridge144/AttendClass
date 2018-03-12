@@ -62,24 +62,7 @@ public class AdvertiserService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String instruction = intent.getStringExtra("Instruction");
-        byte[] bitmap0 = intent.getByteArrayExtra("bitmap0");
-        byte[] bitmap1 = intent.getByteArrayExtra("bitmap1");
-        byte[] bitmap2 = intent.getByteArrayExtra("bitmap2");
-        byte[] bitmap3 = intent.getByteArrayExtra("bitmap3");
-        advertisingData = null;
-        if(instruction.equals("00")){
-            advertisingData = bitmap0;
-        }
-        else if(instruction.equals("10")){
-            advertisingData = bitmap1;
-        }
-        else if(instruction.equals("01")){
-            advertisingData = bitmap2;
-        }
-        else if(instruction.equals("11")){
-            advertisingData = bitmap3;
-        }
+        advertisingData = intent.getByteArrayExtra("bitmap");
         Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);

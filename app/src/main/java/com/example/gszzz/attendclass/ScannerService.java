@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ public class ScannerService extends Service {
     public static final String SCANNING_FAILED_EXTRA_CODE = "failureCode";
     public static final int SCANNING_TIMED_OUT = 6;
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
+    private static final String TAG = "ScannerService";
 
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
@@ -49,9 +51,9 @@ public class ScannerService extends Service {
     private Runnable timeoutRunnable;
 
     /**
-     * Length of time to allow advertising before automatically shutting off. (10 minutes)
+     * Length of time to allow advertising before automatically shutting off.
      */
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
+    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(30, TimeUnit.MINUTES);
 
     @Override
     public void onCreate() {
@@ -65,14 +67,12 @@ public class ScannerService extends Service {
     private void startScanning() {
         goForeground();
         if (mScanCallback == null) {
-//            Toast.makeText(getApplicationContext(), "Starting scanning ", Toast.LENGTH_SHORT).show();
             //set timeout for scanning
             setTimeout();
             //start a new scan
             mScanCallback = new SampleScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
-
-            Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), R.string.scanning_already_started, Toast.LENGTH_SHORT).show();
         }
@@ -115,7 +115,7 @@ public class ScannerService extends Service {
             //add to the scanResults list
             addScanResult(result);
 
-            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
 
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
@@ -240,7 +240,9 @@ public class ScannerService extends Service {
             if (mBluetoothManager !=null) {
                 BluetoothAdapter mBluetoothAdapter = mBluetoothManager.getAdapter();
                 if (mBluetoothAdapter != null) {
+//                    Log.i(TAG, "before got scanner");
                     mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+//                    Log.i(TAG, "got scanner");
                 } else {
                     Toast.makeText(this, R.string.bluetooth_not_supported, Toast.LENGTH_LONG).show();
                 }
