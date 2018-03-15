@@ -63,7 +63,7 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         advertisingData = intent.getByteArrayExtra("bitmap");
-        Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -85,6 +85,7 @@ public class AdvertiserService extends Service {
 
         if (mAdvertiseCallback == null) {
             AdvertiseSettings settings = buildAdvertiseSettings();
+            Toast.makeText(this, "Advertised power: " + settings.getTxPowerLevel(), Toast.LENGTH_SHORT).show();
             AdvertiseData data = buildAdvertiseData();
             mAdvertiseCallback = new SampleAdvertiseCallback();
 
@@ -128,7 +129,8 @@ public class AdvertiserService extends Service {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
+        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+        settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
         settingsBuilder.setTimeout(0);
         return settingsBuilder.build();
     }

@@ -45,7 +45,10 @@ public class AttendanceChecking extends AppCompatActivity {
     public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
     public static BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    public static int scannedTimes = 0;
     public int currentIndex;
+    public int averageRxPower;
+    public int[] rssi = new int[10000];
     public static long startTime = 0;
     private static final String TAG = "AttendanceChecking";
 
@@ -76,12 +79,14 @@ public class AttendanceChecking extends AppCompatActivity {
             long millis = System.currentTimeMillis() - startTime;
             int seconds = (int) (millis / 1000);
             int minutes = seconds / 60;
+            int hours = minutes / 60;
+            minutes = minutes % 60;
             seconds = seconds % 60;
             double range = 0.2;
             double secondsUntilFinish = (millisUntilFinish / 1000.0);
             StringBuilder s = new StringBuilder();
 
-            timerTextView.setText(String.format("%d:%02d", minutes, seconds));
+            timerTextView.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 
             if (abs(secondsUntilFinish % 1) < range || abs(secondsUntilFinish % 1 - 1) < range) {
                 for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
@@ -102,7 +107,7 @@ public class AttendanceChecking extends AppCompatActivity {
                 s.append("\n");
                 bitmapTextView.setText(s.toString());
             }
-            Toast.makeText(getApplicationContext(), "Bitmap updated", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "Bitmap updated", Toast.LENGTH_SHORT).show();
         }
         @Override
         public void onFinish() {
@@ -178,7 +183,6 @@ public class AttendanceChecking extends AppCompatActivity {
                         checkBTPermissions();
 
                         startTime = System.currentTimeMillis();
-//                        timerHandler.postDelayed(timerRunnable, 0);
                         handler.post(runnableCode);
                         startScanning();
                         Log.i(TAG, "after start scanning");
@@ -220,7 +224,6 @@ public class AttendanceChecking extends AppCompatActivity {
                         checkBTPermissions();
 
                         startTime = System.currentTimeMillis();
-//                        timerHandler.postDelayed(timerRunnable, 0);
                         handler.post(runnableCode);
                         //Start service
                         startScanning();
@@ -328,10 +331,17 @@ public class AttendanceChecking extends AppCompatActivity {
     }
 
     public void stopScanningOnClicked(View view) {
-        if (ScannerService.running) {
-            Toast.makeText(getApplicationContext(), "Is running... Stopping the service...", Toast.LENGTH_SHORT).show();
-            stopScanning();
+//        if (ScannerService.running) {
+//            Toast.makeText(getApplicationContext(), "Is running... Stopping the service...", Toast.LENGTH_SHORT).show();
+//            stopScanning();
+//        }
+        int i;
+        averageRxPower = 0;
+        for(i=0; i<currentIndex; i++){
+            averageRxPower += rssi[i];
         }
+        averageRxPower = averageRxPower/i;
+        Toast.makeText(getApplicationContext(), "Ave Rx power is: " + Integer.toString(averageRxPower), Toast.LENGTH_SHORT).show();
     }
 
     //Check for permission to discover other devices
@@ -356,17 +366,23 @@ public class AttendanceChecking extends AppCompatActivity {
                     currentIndex = scanResults.size() - 1 ;
                     List<ParcelUuid> uuidData = scanResults.get(currentIndex).getScanRecord().getServiceUuids();
                     byte[] receivedData = scanResults.get(currentIndex).getScanRecord().getServiceData().get(uuidData.get(0));
+                    rssi[currentIndex] = scanResults.get(currentIndex).getRssi();
+
 //                    Log.i(TAG, Integer.toString(uuidData.size()));
                     // set the relayed bitmap as the value of received data
                     relayedBitmap.clear();
                     temp.clear();
                     relayedBitmap.or(BitSet.valueOf(receivedData));
 
+                    scannedTimes += 1;
+
+                    Toast.makeText(getApplicationContext(), "Power: " + rssi[currentIndex], Toast.LENGTH_SHORT).show();
+
                     StringBuilder s = new StringBuilder();
                     for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
                         s.append(relayedBitmap.get(i) ? "1" : "0");
                     }
-                    Toast.makeText(getApplicationContext(), "bitmap: " + s.toString(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getApplicationContext(), "bitmap: " + s.toString(), Toast.LENGTH_SHORT).show();
 
                     // check the page number
                     if (s.substring(0,2).equals("00")) {
@@ -420,7 +436,7 @@ public class AttendanceChecking extends AppCompatActivity {
                     }
 
                     String totalNumber = " " + scanResults.size() + " ";
-                    totalNumTextView.setText(totalNumber);
+                    totalNumTextView.setText(Integer.toString(scannedTimes));
                 } catch (Resources.NotFoundException e) {
                     Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {

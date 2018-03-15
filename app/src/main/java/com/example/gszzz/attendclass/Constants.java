@@ -15,5 +15,5 @@ public class Constants {
 
     public static final int BIAS = 2; // 2 seconds
 
-    public static final int CLASS_DURATION = 30 * 60; // 30 minutes
+    public static final int CLASS_DURATION = 60 * 60 * 8; // 30 minutes
 }

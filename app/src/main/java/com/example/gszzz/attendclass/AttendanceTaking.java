@@ -49,6 +49,7 @@ public class AttendanceTaking extends AppCompatActivity {
     public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    public static int advertisedTimes = 0;
     public int currentIndex = 0;
     public static long startTime = 0;
 
@@ -80,11 +81,16 @@ public class AttendanceTaking extends AppCompatActivity {
             long millis = System.currentTimeMillis() - startTime;
             int seconds = (int) (millis / 1000);
             int minutes = seconds / 60;
+            int hours = minutes / 60;
+            minutes = minutes % 60;
             seconds = seconds % 60;
             double range = 0.2;
             double secondsUntilFinish = (millisUntilFinish / 1000.0);
 
-            labelTextView.setText(String.format("%d:%02d", minutes, seconds));
+            labelTextView.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+//            Log.i(TAG, Integer.toString(mBluetoothAdapter.getLeMaximumAdvertisingDataLength()));
+
+            // TODO: record number of advertise made and number of scan made. calculate the ratio as probability of success
 
             // no difference in bitmap; can rest
             if (restIndicator){
@@ -233,7 +239,6 @@ public class AttendanceTaking extends AppCompatActivity {
                         checkBTPermissions();
 
                         startTime = System.currentTimeMillis();
-//                        timerHandler.postDelayed(timerRunnable, 0);
                         handler.post(runnableCode);
 
                     } else {
@@ -270,7 +275,6 @@ public class AttendanceTaking extends AppCompatActivity {
                         checkBTPermissions();
 
                         startTime = System.currentTimeMillis();
-//                        timerHandler.postDelayed(timerRunnable, 0);
                         handler.post(runnableCode);
                     } else {
 
@@ -372,7 +376,7 @@ public class AttendanceTaking extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),"error! no page number!", Toast.LENGTH_SHORT).show();
         }
         startAdvertising(s.substring(0,2));
-        moduleLocationTextView.setText(String.format("Now is advertising page %s", s.substring(0, 2)));
+        moduleLocationTextView.setText(Integer.toString(advertisedTimes));
         dataTextView.setText(s.substring(2, Constants.MAX_NUMBER_OF_BITS));
     }
 
@@ -383,7 +387,7 @@ public class AttendanceTaking extends AppCompatActivity {
         if(!ScannerService.running) {
             startScanning();
         }
-        moduleLocationTextView.setText("Now is scanning");
+//        moduleLocationTextView.setText("Now is scanning");
         dataTextView.setText("Not advertising...");
         Log.i(TAG,"scan");
     }
@@ -433,6 +437,7 @@ public class AttendanceTaking extends AppCompatActivity {
                 intent.putExtra("bitmap", bitmap11.toByteArray());
                 break;
         }
+        advertisedTimes += 1;
         return intent;
     }
 
@@ -447,10 +452,10 @@ public class AttendanceTaking extends AppCompatActivity {
     }
 
     public static void randomizeBitmaps(){
-//        bitmap00.clear(2,Constants.MAX_NUMBER_OF_BITS);
-//        bitmap01.clear(2,Constants.MAX_NUMBER_OF_BITS);
-//        bitmap10.clear(2,Constants.MAX_NUMBER_OF_BITS);
-//        bitmap11.clear(2,Constants.MAX_NUMBER_OF_BITS);
+        bitmap00.clear(2,Constants.MAX_NUMBER_OF_BITS);
+        bitmap01.clear(2,Constants.MAX_NUMBER_OF_BITS);
+        bitmap10.clear(2,Constants.MAX_NUMBER_OF_BITS);
+        bitmap11.clear(2,Constants.MAX_NUMBER_OF_BITS);
         int randomPage = ThreadLocalRandom.current().nextInt(0, 4);
         int randomNum = ThreadLocalRandom.current().nextInt(2, Constants.MAX_NUMBER_OF_BITS);
         switch (randomPage) {

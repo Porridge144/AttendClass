@@ -53,7 +53,7 @@ public class ScannerService extends Service {
     /**
      * Length of time to allow advertising before automatically shutting off.
      */
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(30, TimeUnit.MINUTES);
+    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
 
     @Override
     public void onCreate() {
@@ -68,7 +68,7 @@ public class ScannerService extends Service {
         goForeground();
         if (mScanCallback == null) {
             //set timeout for scanning
-            setTimeout();
+//            setTimeout();
             //start a new scan
             mScanCallback = new SampleScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
@@ -82,7 +82,7 @@ public class ScannerService extends Service {
     public void onDestroy() {
         running = false;
         stopScanning();
-        mHandler.removeCallbacks(timeoutRunnable);
+//        mHandler.removeCallbacks(timeoutRunnable);
         stopForeground(true);
         //Toast.makeText(getApplicationContext(), "Scanning stopped...", Toast.LENGTH_SHORT).show();
         super.onDestroy();
