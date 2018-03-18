@@ -21,6 +21,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,21 +32,25 @@ import java.util.List;
 
 import static java.lang.Math.abs;
 
-public class AttendanceChecking extends AppCompatActivity {
+public class AttendanceChecking extends AppCompatActivity{
 
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
     private TextView bitmapTextView;
     private TextView timerTextView;
+//    private Button lowFreqButton;
+//    private Button balancedFreqButton;
+//    private Button highFreqButton;
     private ArrayList<ScanResult> scanResults;
-    public static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
-    public static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
-    public static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
-    public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // 20 bytes
+    public static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    public static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    public static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
     public static BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static int scannedTimes = 0;
+    public static int powerLevel = 1;
     public int currentIndex;
     public int averageRxPower;
     public int[] rssi = new int[10000];
@@ -124,6 +129,9 @@ public class AttendanceChecking extends AppCompatActivity {
 
         scanResults = new ArrayList<>();
         totalNumTextView = findViewById(R.id.totalNumTextView);
+//        lowFreqButton = findViewById(R.id.lowButton);
+//        balancedFreqButton = findViewById(R.id.balancedButton);
+//        highFreqButton = findViewById(R.id.highButton);
         timerTextView = findViewById(R.id.textView6);
         bitmapTextView = findViewById(R.id.textView5);
 
@@ -261,31 +269,25 @@ public class AttendanceChecking extends AppCompatActivity {
 //        Context c = getApplicationContext();
 //        c.startService(getAdvertiseServiceIntent(c, lecturerLabel));
 //    }
-
-    private void stopAdvertising() {
-        Context c = getApplicationContext();
-        c.stopService(getAdvertiseServiceIntent(c));
-    }
+//
+//    private void stopAdvertising() {
+//        Context c = getApplicationContext();
+//        c.stopService(getAdvertiseServiceIntent(c));
+//    }
 
     /**
      * Returns Intent addressed to the {@code AdvertiserService} class.
      */
 
-    private static Intent getAdvertiseServiceIntent(Context c) {
-        Intent intent = new Intent(c, AdvertiserService.class);
-        //intent.putExtra("message", "Put message here!!");
-        return intent;
-    }
-
-    private static Intent getAdvertiseServiceIntent(Context c, String lecturerLabel) {
-        Intent intent = new Intent(c, AdvertiserService.class);
-        //intent.setAction("ClassBegins");
-        return intent;
-    }
+//    private static Intent getAdvertiseServiceIntent(Context c) {
+//        Intent intent = new Intent(c, AdvertiserService.class);
+//        //intent.putExtra("message", "Put message here!!");
+//        return intent;
+//    }
 
     private static Intent getScannerServiceIntent(Context c) {
         Intent intent = new Intent(c, ScannerService.class);
-//        intent.putExtra("message", "Put message here!!");
+        intent.putExtra("power", powerLevel);
         return intent;
     }
 
@@ -293,14 +295,14 @@ public class AttendanceChecking extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(scanResultsReceiver);
-//        timerHandler.removeCallbacks(timerRunnable);
-        Toast.makeText(getApplicationContext(), "Scanning activity get destroyed....", Toast.LENGTH_SHORT).show();
+        handler.removeCallbacks(runnableCode);
+        Log.i(TAG, "activity destroyed");
         if (ScannerService.running) {
             stopScanning();
         }
-        if (AdvertiserService.running){
-            stopAdvertising();
-        }
+//        if (AdvertiserService.running){
+//            stopAdvertising();
+//        }
     }
 
     /**
@@ -312,6 +314,7 @@ public class AttendanceChecking extends AppCompatActivity {
         super.onResume();
         IntentFilter intentFilter = new IntentFilter(ScannerService.SCANNING_FAILED);
         registerReceiver(scanningFailureReceiver, intentFilter);
+        Log.i(TAG, "activity resumed");
     }
 
     /**
@@ -321,13 +324,31 @@ public class AttendanceChecking extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-//        timerHandler.removeCallbacks(timerRunnable);
         unregisterReceiver(scanningFailureReceiver);
+        Log.i(TAG, "activity paused");
     }
 
     public void enterNameList(View view) {
         Intent intent = new Intent(this, NameList.class);
         startActivity(intent);
+    }
+
+    public void lowFreqOnClicked(View view){
+        stopScanning();
+        powerLevel = 0;
+        startScanning();
+    }
+
+    public void balancedOnClicked(View view){
+        stopScanning();
+        powerLevel = 1;
+        startScanning();
+    }
+
+    public void highFreqOnClicked(View view){
+        stopScanning();
+        powerLevel = 2;
+        startScanning();
     }
 
     public void stopScanningOnClicked(View view) {

@@ -12,8 +12,8 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="78dp"
-        android:textSize="23sp"
-        android:text="Currently in module" />
+        android:text="Currently involvde in"
+        android:textSize="23sp" />
 
     <TextView
         android:id="@+id/moduleInfo"
@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/defaultText"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="38dp"
         android:text="EE1001"
         android:textSize="30sp" />
 
@@ -31,28 +30,54 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/moduleInfo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:textSize="27sp"
-        android:text="At E5-04-21" />
+        android:text="At E5-04-21"
+        android:textSize="27sp" />
 
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/moduleLocation"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="47dp"
-        android:textSize="20sp"
-        android:text="Advertising Data" />
+        android:layout_centerVertical="true"
+        android:text="Advertising Data"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/moduleLocation"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="95dp"
+        android:layout_marginTop="21dp"
         android:text="Timer"
         android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/lowButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/balancedButton"
+        android:layout_alignBottom="@+id/balancedButton"
+        android:onClick="lowFreqOnClicked"
+        android:text="Low Frequency" />
+
+    <Button
+        android:id="@+id/balancedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="430dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="balancedOnClicked"
+        android:text="Balanced" />
+
+    <Button
+        android:id="@+id/highButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/balancedButton"
+        android:layout_alignBottom="@+id/balancedButton"
+        android:layout_alignParentEnd="true"
+        android:onClick="highFreqOnClicked"
+        android:text="High Frequency" />
 
 </RelativeLayout>

@@ -22,6 +22,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AttendanceTaking extends AppCompatActivity {
+public class AttendanceTaking extends AppCompatActivity{
 
     private static final String TAG = "AttendanceTaking";
     private BroadcastReceiver advertisingFailureReceiver;
@@ -43,13 +44,15 @@ public class AttendanceTaking extends AppCompatActivity {
     private ArrayList<ScanResult> scanResults;
     public boolean restIndicator = false;
     public static long restStartTime = 0;
-    public static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    public static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    public static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    public static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
     public static BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     public static int advertisedTimes = 0;
+    public static int scannedTimes = 0;
+    public static int powerLevel = 1;
     public int currentIndex = 0;
     public static long startTime = 0;
 
@@ -71,7 +74,7 @@ public class AttendanceTaking extends AppCompatActivity {
         private Handler h;
         boolean advertisePeriodEnd = false;
         CDT(Runnable ext, Handler han){
-            super(Constants.DURATION*1000, 1000);
+            super(Constants.DURATION*60*1000, 1000);
             this.e = ext;
             this.h = han;
         }
@@ -111,16 +114,16 @@ public class AttendanceTaking extends AppCompatActivity {
             }
             // there is difference in bitmap; need to advertise
             else{
-                if (( secondsUntilFinish < Constants.DURATION - Constants.BIAS  + range) & (secondsUntilFinish > Constants.DURATION - Constants.BIAS - range)) {
+                if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS  + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(0);
-                } else if (( secondsUntilFinish < Constants.DURATION - Constants.BIAS - Constants.ADVERTISING_INTERVAL + range) & (secondsUntilFinish > Constants.DURATION - Constants.BIAS - Constants.ADVERTISING_INTERVAL - range)) {
+                } else if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(1);
-                } else if (( secondsUntilFinish < Constants.DURATION - Constants.BIAS - Constants.ADVERTISING_INTERVAL*2 + range) & (secondsUntilFinish > Constants.DURATION - Constants.BIAS - Constants.ADVERTISING_INTERVAL*2 - range)) {
+                } else if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*2 + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*2 - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(2);
-                } else if (( secondsUntilFinish < Constants.DURATION - Constants.BIAS - Constants.ADVERTISING_INTERVAL*3 + range) & (secondsUntilFinish > Constants.DURATION - Constants.BIAS - Constants.ADVERTISING_INTERVAL*3 - range)) {
+                } else if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*3 + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*3 - range)) {
                     Log.i(TAG,"here");
                     taskAdvertise(3);
                     advertisePeriodEnd = true;
@@ -147,6 +150,9 @@ public class AttendanceTaking extends AppCompatActivity {
 
         labelTextView = findViewById(R.id.textView4);
         dataTextView = findViewById(R.id.textView3);
+//        lowFreqButton = findViewById(R.id.lowButton);
+//        balancedFreqButton = findViewById(R.id.balancedButton);
+//        highFreqButton = findViewById(R.id.highButton);
         moduleLocationTextView = findViewById(R.id.moduleLocation);
 
         //set page number
@@ -304,45 +310,6 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
-    /**
-     * When app comes on screen, check if BLE Advertisements are running, set switch accordingly,
-     * and register the Receiver to be notified if Advertising fails.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter intentFilter = new IntentFilter(AdvertiserService.ADVERTISING_FAILED);
-        registerReceiver(advertisingFailureReceiver, intentFilter);
-        registerReceiver(scanningFailureReceiver, intentFilter);
-    }
-
-    /**
-     * When app goes off screen, unregister the Advertising failure Receiver to stop memory leaks.
-     * (and because the app doesn't care if Advertising fails while the UI isn't active)
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
-//        timerHandler.removeCallbacks(timerRunnable);
-        unregisterReceiver(advertisingFailureReceiver);
-        unregisterReceiver(scanningFailureReceiver);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(scanResultsReceiver);
-        unregisterReceiver(advertisingFailureReceiver);
-        unregisterReceiver(scanningFailureReceiver);
-//        timerHandler.removeCallbacks(timerRunnable);
-        if (ScannerService.running) {
-            stopScanning();
-        }
-        if (AdvertiserService.running){
-            stopAdvertising();
-        }
-    }
-
     private void taskAdvertise(int pageNum){
         if(ScannerService.running) {
             stopScanning();
@@ -377,7 +344,7 @@ public class AttendanceTaking extends AppCompatActivity {
         }
         startAdvertising(s.substring(0,2));
         moduleLocationTextView.setText(Integer.toString(advertisedTimes));
-        dataTextView.setText(s.substring(2, Constants.MAX_NUMBER_OF_BITS));
+        dataTextView.setText(s);
     }
 
     private void taskScan(){
@@ -438,6 +405,7 @@ public class AttendanceTaking extends AppCompatActivity {
                 break;
         }
         advertisedTimes += 1;
+        intent.putExtra("power", powerLevel);
         return intent;
     }
 
@@ -475,6 +443,61 @@ public class AttendanceTaking extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(scanResultsReceiver);
+        handler.removeCallbacks(runnableCode);
+        Log.i(TAG, "activity destroyed");
+        if (ScannerService.running) {
+            stopScanning();
+        }
+        if (AdvertiserService.running){
+            stopAdvertising();
+        }
+    }
+
+    /**
+     * When app comes on screen, check if BLE Advertisements are running, set switch accordingly,
+     * and register the Receiver to be notified if Advertising fails.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter intentFilterAd = new IntentFilter(AdvertiserService.ADVERTISING_FAILED);
+        IntentFilter intentFilterSc = new IntentFilter(ScannerService.SCANNING_FAILED);
+        registerReceiver(advertisingFailureReceiver, intentFilterAd);
+        registerReceiver(scanningFailureReceiver, intentFilterSc);
+        Log.i(TAG, "activity resumed");
+    }
+
+    /**
+     * When app goes off screen, unregister the Advertising failure Receiver to stop memory leaks.
+     * (and because the app doesn't care if Advertising fails while the UI isn't active)
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(advertisingFailureReceiver);
+        unregisterReceiver(scanningFailureReceiver);
+        Log.i(TAG, "activity paused");
+    }
+
+    public void lowFreqOnClicked(View view){
+        stopAdvertising();
+        powerLevel = 0;
+    }
+
+    public void balancedOnClicked(View view){
+        stopAdvertising();
+        powerLevel = 1;
+    }
+
+    public void highFreqOnClicked(View view){
+        stopAdvertising();
+        powerLevel = 2;
+    }
+
     private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -490,6 +513,8 @@ public class AttendanceTaking extends AppCompatActivity {
                     relayedBitmap.clear();
                     temp.clear();
                     relayedBitmap.or(BitSet.valueOf(receivedData));
+
+                    scannedTimes += 1;
 
                     StringBuilder s = new StringBuilder();
                     for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {

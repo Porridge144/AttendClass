@@ -43,6 +43,7 @@ public class ScannerService extends Service {
     public static final int SCANNING_TIMED_OUT = 6;
     public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
     private static final String TAG = "ScannerService";
+    public static int powerLevel;
 
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
@@ -53,26 +54,34 @@ public class ScannerService extends Service {
     /**
      * Length of time to allow advertising before automatically shutting off.
      */
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
+    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(Constants.DURATION, TimeUnit.MINUTES);
 
     @Override
     public void onCreate() {
         running = true;
         scanResults = new ArrayList<>();
         initialize();
-        startScanning();
+//        startScanning();
         super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+//        scanResults = new ArrayList<>();
+        powerLevel = intent.getIntExtra("power", 1);
+        startScanning();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     private void startScanning() {
         goForeground();
         if (mScanCallback == null) {
             //set timeout for scanning
-//            setTimeout();
+            setTimeout();
             //start a new scan
             mScanCallback = new SampleScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
-//            Toast.makeText(getApplicationContext(), "Scanning started...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Scan frequency: " + buildScanSettings().getScanMode(), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), R.string.scanning_already_started, Toast.LENGTH_SHORT).show();
         }
@@ -82,7 +91,7 @@ public class ScannerService extends Service {
     public void onDestroy() {
         running = false;
         stopScanning();
-//        mHandler.removeCallbacks(timeoutRunnable);
+        mHandler.removeCallbacks(timeoutRunnable);
         stopForeground(true);
         //Toast.makeText(getApplicationContext(), "Scanning stopped...", Toast.LENGTH_SHORT).show();
         super.onDestroy();
@@ -101,7 +110,7 @@ public class ScannerService extends Service {
             for (ScanResult result : results) {
                 addScanResult(result);
             }
-            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "Multiple new devices detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
 
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
@@ -114,9 +123,6 @@ public class ScannerService extends Service {
             super.onScanResult(callbackType, result);
             //add to the scanResults list
             addScanResult(result);
-
-//            Toast.makeText(getApplicationContext(), "New device detected... (" + scanResults.size() + ")", Toast.LENGTH_SHORT).show();
-
             Intent newDeviceFoundIntent = new Intent();
             newDeviceFoundIntent.setAction(NEW_DEVICE_FOUND);
             newDeviceFoundIntent.putParcelableArrayListExtra(PARCELABLE_SCANRESULTS, scanResults);
@@ -178,7 +184,20 @@ public class ScannerService extends Service {
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+        switch (powerLevel) {
+            case 0:
+                builder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER);
+                Log.i(TAG, "mode is 0, low power");
+                break;
+            case 1:
+                builder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+                Log.i(TAG, "mode is 1, balanced");
+                break;
+            case 2:
+                builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+                Log.i(TAG, "mode is 2, high power");
+                break;
+        }
         return builder.build();
     }
 

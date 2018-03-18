@@ -44,6 +44,7 @@ public class AdvertiserService extends Service {
     private Handler mHandler;
     private Runnable timeoutRunnable;
     private byte[] advertisingData = null;
+    public static int powerLevel;
 
     private static final String TAG = "AdvertiserService";
 
@@ -63,6 +64,7 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         advertisingData = intent.getByteArrayExtra("bitmap");
+        powerLevel = intent.getIntExtra("power", 1);
 //        Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
@@ -85,7 +87,7 @@ public class AdvertiserService extends Service {
 
         if (mAdvertiseCallback == null) {
             AdvertiseSettings settings = buildAdvertiseSettings();
-            Toast.makeText(this, "Advertised power: " + settings.getTxPowerLevel(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Advertise frequency: " + settings.getMode(), Toast.LENGTH_SHORT).show();
             AdvertiseData data = buildAdvertiseData();
             mAdvertiseCallback = new SampleAdvertiseCallback();
 
@@ -129,7 +131,20 @@ public class AdvertiserService extends Service {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+        switch(powerLevel){
+            case 0:
+                settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+                Log.i(TAG, "mode is 0, low power");
+                break;
+            case 1:
+                settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
+                Log.i(TAG, "mode is 1, balanced");
+                break;
+            case 2:
+                settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
+                Log.i(TAG, "mode is 2, high power");
+                break;
+        }
         settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
         settingsBuilder.setTimeout(0);
         return settingsBuilder.build();

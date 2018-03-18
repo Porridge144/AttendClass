@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/Greeting"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="38dp"
         android:text="This is EE1001"
         android:textSize="25dp" />
 
@@ -20,7 +19,7 @@
         android:id="@+id/totalNumTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/furtherInfo"
+        android:layout_below="@+id/moduleInfo"
         android:layout_centerHorizontal="true"
         android:text="43/50"
         android:textSize="35dp" />
@@ -29,22 +28,21 @@
         android:id="@+id/furtherInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/totalNumTextView"
+        android:layout_centerHorizontal="true"
+        android:onClick="enterNameList"
         android:text="see more"
         android:textColorHighlight="@android:color/holo_red_dark"
-        android:textSize="20dp"
-        android:layout_centerVertical="true"
-        android:onClick="enterNameList"
-        android:layout_centerHorizontal="true" />
+        android:textSize="20dp" />
 
     <Button
         android:id="@+id/stopScanningTempButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/balancedButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="53dp"
         android:onClick="stopScanningOnClicked"
-        android:text="Stop Scanning" />
+        android:text="See Rx Power" />
 
     <TextView
         android:id="@+id/Greeting"
@@ -52,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="57dp"
         android:text="Hello Professor"
         android:textSize="25dp" />
 
@@ -62,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView6"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="52dp"
         android:text="Bitmap" />
 
     <TextView
@@ -71,7 +69,34 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/furtherInfo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="11dp"
-        android:text="TextView" />
+        android:text="Time" />
+
+    <Button
+        android:id="@+id/lowButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/balancedButton"
+        android:layout_alignBottom="@+id/balancedButton"
+        android:onClick="lowFreqOnClicked"
+        android:text="Low Frequency" />
+
+    <Button
+        android:id="@+id/balancedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="390dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="balancedOnClicked"
+        android:text="Balanced" />
+
+    <Button
+        android:id="@+id/highButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/balancedButton"
+        android:layout_alignBottom="@+id/balancedButton"
+        android:layout_alignParentEnd="true"
+        android:onClick="highFreqOnClicked"
+        android:text="High Frequency" />
 
 </RelativeLayout>
