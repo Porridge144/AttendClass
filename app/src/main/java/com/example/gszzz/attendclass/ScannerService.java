@@ -33,17 +33,17 @@ public class ScannerService extends Service {
      * This is the best practice method as defined here:
      * https://groups.google.com/forum/#!topic/android-developers/jEvXMWgbgzE
      */
-    public static boolean running = false;
-    public ArrayList<ScanResult> scanResults;
+    protected static boolean running = false;
+    private ArrayList<ScanResult> scanResults;
 
-    public static final String NEW_DEVICE_FOUND = "ble_new_device_found";
-    public static final String SCANNING_FAILED =
+    protected static final String NEW_DEVICE_FOUND = "ble_new_device_found";
+    protected static final String SCANNING_FAILED =
             "com.example.gszzz.attendclass.scanning_failed";
-    public static final String SCANNING_FAILED_EXTRA_CODE = "failureCode";
-    public static final int SCANNING_TIMED_OUT = 6;
-    public static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
-    private static final String TAG = "ScannerService";
-    public static int powerLevel;
+    protected static final String SCANNING_FAILED_EXTRA_CODE = "failureCode";
+    protected static final int SCANNING_TIMED_OUT = 6;
+    protected static final String PARCELABLE_SCANRESULTS = "ParcelScanResults";
+    protected static final String TAG = "ScannerService";
+    private static int powerLevel;
 
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
@@ -54,7 +54,7 @@ public class ScannerService extends Service {
     /**
      * Length of time to allow advertising before automatically shutting off.
      */
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(Constants.DURATION, TimeUnit.MINUTES);
+    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(Constants.CLASS_DURATION, TimeUnit.MINUTES);
 
     @Override
     public void onCreate() {
@@ -68,7 +68,7 @@ public class ScannerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        scanResults = new ArrayList<>();
-        powerLevel = intent.getIntExtra("power", 1);
+        powerLevel = intent.getIntExtra("power", 2);
         startScanning();
         return super.onStartCommand(intent, flags, startId);
     }

@@ -39,22 +39,21 @@ public class AttendanceChecking extends AppCompatActivity{
     private TextView totalNumTextView;
     private TextView bitmapTextView;
     private TextView timerTextView;
-//    private Button lowFreqButton;
-//    private Button balancedFreqButton;
-//    private Button highFreqButton;
     private ArrayList<ScanResult> scanResults;
-    public static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static int scannedTimes = 0;
-    public static int powerLevel = 1;
-    public int currentIndex;
-    public int averageRxPower;
-    public int[] rssi = new int[10000];
-    public static long startTime = 0;
+    private BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    private BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    private int scannedTimes = 0;
+    private static int powerLevel = 2;
+    private int currentIndex;
+    private int lastIndex;
+    private int averageRxPower;
+    private int presentStuNumber = 0;
+    private int[] rssi = new int[10000];
+    private long startTime = 0;
     private static final String TAG = "AttendanceChecking";
 
     // Create the Handler object (on the main thread by default)
@@ -74,7 +73,7 @@ public class AttendanceChecking extends AppCompatActivity{
         private Runnable e;
         private Handler h;
         CDT(Runnable ext, Handler han){
-            super(Constants.CLASS_DURATION*1000, 1000);
+            super(Constants.CLASS_DURATION*60*1000, 1000);
             this.e = ext;
             this.h = han;
         }
@@ -87,37 +86,25 @@ public class AttendanceChecking extends AppCompatActivity{
             int hours = minutes / 60;
             minutes = minutes % 60;
             seconds = seconds % 60;
-            double range = 0.2;
+            double range = 0.5;
             double secondsUntilFinish = (millisUntilFinish / 1000.0);
-            StringBuilder s = new StringBuilder();
 
             timerTextView.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 
-            if (abs(secondsUntilFinish % 1) < range || abs(secondsUntilFinish % 1 - 1) < range) {
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap00.get(i) ? "1" : "0");
-                }
-                s.append("\n");
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap01.get(i) ? "1" : "0");
-                }
-                s.append("\n");
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap10.get(i) ? "1" : "0");
-                }
-                s.append("\n");
-                for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                    s.append(bitmap11.get(i) ? "1" : "0");
-                }
-                s.append("\n");
-                bitmapTextView.setText(s.toString());
+            if (secondsUntilFinish%2 < 1 + range && secondsUntilFinish%2 > 1 - range && presentStuNumber!=Constants.STUDENTS) {
+                presentStuNumber = bitmap00.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap01.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap10.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap11.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality();
+                bitmapTextView.setText(String.format("Absent Student Number: %d", Constants.STUDENTS - presentStuNumber));
             }
-//            Toast.makeText(getApplicationContext(), "Bitmap updated", Toast.LENGTH_SHORT).show();
+            if (presentStuNumber == Constants.STUDENTS){
+                Toast.makeText(getApplicationContext(), "All students here!", Toast.LENGTH_LONG).show();
+                secondsUntilFinish = 0;
+            }
+//
         }
         @Override
         public void onFinish() {
             h.post(e);
-//            Log.i("Handlers", "Finish");
+            Log.i("Handlers", "Finish");
         }
     }
 
@@ -129,9 +116,6 @@ public class AttendanceChecking extends AppCompatActivity{
 
         scanResults = new ArrayList<>();
         totalNumTextView = findViewById(R.id.totalNumTextView);
-//        lowFreqButton = findViewById(R.id.lowButton);
-//        balancedFreqButton = findViewById(R.id.balancedButton);
-//        highFreqButton = findViewById(R.id.highButton);
         timerTextView = findViewById(R.id.textView6);
         bitmapTextView = findViewById(R.id.textView5);
 
@@ -193,7 +177,7 @@ public class AttendanceChecking extends AppCompatActivity{
                         startTime = System.currentTimeMillis();
                         handler.post(runnableCode);
                         startScanning();
-                        Log.i(TAG, "after start scanning");
+//                        Log.i(TAG, "after start scanning");
 //                        Toast.makeText(getApplicationContext(), "Start Scanning!!!", Toast.LENGTH_LONG).show();
                     } else {
 
@@ -249,7 +233,6 @@ public class AttendanceChecking extends AppCompatActivity{
                             Toast.LENGTH_SHORT).show();
                     finish();
                 }
-
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
@@ -264,26 +247,6 @@ public class AttendanceChecking extends AppCompatActivity{
         Context c = getApplicationContext();
         c.stopService(getScannerServiceIntent(c));
     }
-
-//    private void startAdvertising(String lecturerLabel) {
-//        Context c = getApplicationContext();
-//        c.startService(getAdvertiseServiceIntent(c, lecturerLabel));
-//    }
-//
-//    private void stopAdvertising() {
-//        Context c = getApplicationContext();
-//        c.stopService(getAdvertiseServiceIntent(c));
-//    }
-
-    /**
-     * Returns Intent addressed to the {@code AdvertiserService} class.
-     */
-
-//    private static Intent getAdvertiseServiceIntent(Context c) {
-//        Intent intent = new Intent(c, AdvertiserService.class);
-//        //intent.putExtra("message", "Put message here!!");
-//        return intent;
-//    }
 
     private static Intent getScannerServiceIntent(Context c) {
         Intent intent = new Intent(c, ScannerService.class);
@@ -300,9 +263,6 @@ public class AttendanceChecking extends AppCompatActivity{
         if (ScannerService.running) {
             stopScanning();
         }
-//        if (AdvertiserService.running){
-//            stopAdvertising();
-//        }
     }
 
     /**
@@ -382,82 +342,79 @@ public class AttendanceChecking extends AppCompatActivity{
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ScannerService.NEW_DEVICE_FOUND)) {
                 try {
+//                    Log.i(TAG,"Results scanned....");
                     scanResults = intent.getParcelableArrayListExtra(ScannerService.PARCELABLE_SCANRESULTS);
-
                     currentIndex = scanResults.size() - 1 ;
-                    List<ParcelUuid> uuidData = scanResults.get(currentIndex).getScanRecord().getServiceUuids();
-                    byte[] receivedData = scanResults.get(currentIndex).getScanRecord().getServiceData().get(uuidData.get(0));
-                    rssi[currentIndex] = scanResults.get(currentIndex).getRssi();
+                    if(currentIndex==0 || currentIndex > lastIndex) {
+                        List<ParcelUuid> uuidData = scanResults.get(currentIndex).getScanRecord().getServiceUuids();
+                        byte[] receivedData = scanResults.get(currentIndex).getScanRecord().getServiceData().get(uuidData.get(0));
+                        rssi[currentIndex] = scanResults.get(currentIndex).getRssi();
 
-//                    Log.i(TAG, Integer.toString(uuidData.size()));
-                    // set the relayed bitmap as the value of received data
-                    relayedBitmap.clear();
-                    temp.clear();
-                    relayedBitmap.or(BitSet.valueOf(receivedData));
+                        Log.i(TAG, Integer.toString(scanResults.size()));
+                        // set the relayed bitmap as the value of received data
+                        relayedBitmap.clear();
+                        temp.clear();
+                        relayedBitmap.or(BitSet.valueOf(receivedData));
+                        temp.or(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
 
-                    scannedTimes += 1;
+//                        scannedTimes += 1;
+//                    Toast.makeText(getApplicationContext(), "Power: " + rssi[currentIndex], Toast.LENGTH_SHORT).show();
 
-                    Toast.makeText(getApplicationContext(), "Power: " + rssi[currentIndex], Toast.LENGTH_SHORT).show();
-
-                    StringBuilder s = new StringBuilder();
-                    for (int i = 0; i < Constants.MAX_NUMBER_OF_BITS; i++) {
-                        s.append(relayedBitmap.get(i) ? "1" : "0");
-                    }
-//                    Toast.makeText(getApplicationContext(), "bitmap: " + s.toString(), Toast.LENGTH_SHORT).show();
-
-                    // check the page number
-                    if (s.substring(0,2).equals("00")) {
-                        temp.or(bitmap00.get(2, Constants.MAX_NUMBER_OF_BITS));
-                        temp.xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                        // check the page number
+                        if (!relayedBitmap.get(0) && !relayedBitmap.get(1)) {
+                            // 00 = false false
+                            temp.xor(bitmap00.get(2, Constants.MAX_NUMBER_OF_BITS));
 //                        Log.i(TAG, "XOR-ing bitmap 0");
-                        // the two bitmaps are same
-                        if (temp.isEmpty()) {
-//                            Log.i(TAG, "relayed bitmap empty");
-                        } else {
-                            // the two bitmaps are different, xor the parts other than page number
-                            bitmap00.or(relayedBitmap);
-//                            Log.i(TAG, "OR-ing bitmap 0");
-                        }
-                    } else if (s.substring(0,2).equals("01")) {
-                        temp.or(bitmap01.get(2, Constants.MAX_NUMBER_OF_BITS));
-                        temp.xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            // the two bitmaps are same
+                            if (temp.isEmpty()) {
+                                Log.i(TAG, "relayed bitmap empty");
+                            } else {
+                                // the two bitmaps are different, xor the parts other than page number
+                                bitmap00.or(relayedBitmap);
+                                Log.i(TAG, "OR-ing bitmap 0");
+                            }
+                        } else if (!relayedBitmap.get(0) && relayedBitmap.get(1)) {
+                            // 01 = false true
+                            temp.xor(bitmap01.get(2, Constants.MAX_NUMBER_OF_BITS));
 //                        Log.i(TAG, "XOR-ing bitmap 1");
-                        // the two bitmaps are same
-                        if (temp.isEmpty()) {
-//                            Log.i(TAG, "relayed bitmap empty");
-                        } else {
-                            // the two bitmaps are different, xor the parts other than page number
-                            bitmap01.or(relayedBitmap);
-//                            Log.i(TAG, "OR-ing bitmap 1");
-                        }
-                    } else if (s.substring(0,2).equals("10")) {
-                        temp.or(bitmap10.get(2, Constants.MAX_NUMBER_OF_BITS));
-                        temp.xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            // the two bitmaps are same
+                            if (temp.isEmpty()) {
+                                Log.i(TAG, "relayed bitmap empty");
+                            } else {
+                                // the two bitmaps are different, xor the parts other than page number
+                                bitmap01.or(relayedBitmap);
+                                Log.i(TAG, "OR-ing bitmap 1");
+                            }
+                        } else if (relayedBitmap.get(0) && !relayedBitmap.get(1)) {
+                            // 10 = true false
+                            temp.xor(bitmap10.get(2, Constants.MAX_NUMBER_OF_BITS));
 //                        Log.i(TAG, "XOR-ing bitmap 2");
-                        // the two bitmaps are same
-                        if (temp.isEmpty()) {
-//                            Log.i(TAG, "relayed bitmap empty");
-                        } else {
-                            // the two bitmaps are different, xor the parts other than page number
-                            bitmap10.or(relayedBitmap);
-//                            Log.i(TAG, "OR-ing bitmap 2");
-                        }
-                    } else if (s.substring(0,2).equals("11")) {
-                        temp.or(bitmap11.get(2, Constants.MAX_NUMBER_OF_BITS));
-                        temp.xor(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
+                            // the two bitmaps are same
+                            if (temp.isEmpty()) {
+                                Log.i(TAG, "relayed bitmap empty");
+                            } else {
+                                // the two bitmaps are different, xor the parts other than page number
+                                bitmap10.or(relayedBitmap);
+                                Log.i(TAG, "OR-ing bitmap 2");
+                            }
+                        } else if (relayedBitmap.get(0) && relayedBitmap.get(1)) {
+                            // 11 = true true
+                            temp.xor(bitmap11.get(2, Constants.MAX_NUMBER_OF_BITS));
 //                        Log.i(TAG, "XOR-ing bitmap 3");
-                        // the two bitmaps are same
-                        if (temp.isEmpty()) {
-//                            Log.i(TAG, "relayed bitmap empty");
-                        } else {
-                            // the two bitmaps are different, xor the parts other than page number
-                            bitmap11.or(relayedBitmap);
-//                            Log.i(TAG, "OR-ing bitmap 3");
+                            // the two bitmaps are same
+                            if (temp.isEmpty()) {
+                                Log.i(TAG, "relayed bitmap empty");
+                            } else {
+                                // the two bitmaps are different, xor the parts other than page number
+                                bitmap11.or(relayedBitmap);
+                                Log.i(TAG, "OR-ing bitmap 3");
+                            }
                         }
+//                        Log.i(TAG, "Results processed!!!!");
+                        String totalNumber = " " + scanResults.size() + " ";
+                        totalNumTextView.setText(Integer.toString(currentIndex+1));
                     }
-
-                    String totalNumber = " " + scanResults.size() + " ";
-                    totalNumTextView.setText(Integer.toString(scannedTimes));
+                    lastIndex = currentIndex;
                 } catch (Resources.NotFoundException e) {
                     Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {

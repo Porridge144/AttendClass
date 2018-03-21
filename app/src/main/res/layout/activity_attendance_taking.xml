@@ -65,7 +65,7 @@
         android:id="@+id/balancedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="430dp"
+        android:layout_marginTop="330dp"
         android:layout_centerHorizontal="true"
         android:onClick="balancedOnClicked"
         android:text="Balanced" />

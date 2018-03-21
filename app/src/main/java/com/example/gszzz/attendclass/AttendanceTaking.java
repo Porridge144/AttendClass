@@ -42,19 +42,19 @@ public class AttendanceTaking extends AppCompatActivity{
     private TextView moduleLocationTextView;
     private TextView dataTextView;
     private ArrayList<ScanResult> scanResults;
-    public boolean restIndicator = false;
-    public static long restStartTime = 0;
-    public static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
-    public static BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
-    public static int advertisedTimes = 0;
-    public static int scannedTimes = 0;
-    public static int powerLevel = 1;
-    public int currentIndex = 0;
-    public static long startTime = 0;
+    private boolean restIndicator = false;
+    private long restStartTime = 0;
+    private static BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private static BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private static BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private static BitSet bitmap11 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
+    private BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    private BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
+    private static int advertisedTimes = 0;
+    private int scannedTimes = 0;
+    private static int powerLevel = 0;
+    private int currentIndex = 0;
+    private long startTime = 0;
 
     // Create the Handler object (on the main thread by default)
     final Handler handler = new Handler();
@@ -74,7 +74,7 @@ public class AttendanceTaking extends AppCompatActivity{
         private Handler h;
         boolean advertisePeriodEnd = false;
         CDT(Runnable ext, Handler han){
-            super(Constants.DURATION*60*1000, 1000);
+            super((Constants.PERIOD+Constants.BIAS)*1000, 1000);
             this.e = ext;
             this.h = han;
         }
@@ -87,7 +87,7 @@ public class AttendanceTaking extends AppCompatActivity{
             int hours = minutes / 60;
             minutes = minutes % 60;
             seconds = seconds % 60;
-            double range = 0.2;
+            double range = 0.5;
             double secondsUntilFinish = (millisUntilFinish / 1000.0);
 
             labelTextView.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
@@ -114,20 +114,20 @@ public class AttendanceTaking extends AppCompatActivity{
             }
             // there is difference in bitmap; need to advertise
             else{
-                if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS  + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - range)) {
+                if (( secondsUntilFinish < Constants.PERIOD + range) & (secondsUntilFinish > Constants.PERIOD - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(0);
-                } else if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL - range)) {
+                } else if (( secondsUntilFinish < Constants.PERIOD - Constants.ADVERTISING_INTERVAL + range) & (secondsUntilFinish > Constants.PERIOD - Constants.ADVERTISING_INTERVAL - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(1);
-                } else if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*2 + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*2 - range)) {
+                } else if (( secondsUntilFinish < Constants.PERIOD - Constants.ADVERTISING_INTERVAL*2 + range) & (secondsUntilFinish > Constants.PERIOD - Constants.ADVERTISING_INTERVAL*2 - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(2);
-                } else if (( secondsUntilFinish < Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*3 + range) & (secondsUntilFinish > Constants.DURATION*60 - Constants.BIAS - Constants.ADVERTISING_INTERVAL*3 - range)) {
+                } else if (( secondsUntilFinish < Constants.PERIOD - Constants.ADVERTISING_INTERVAL*3 + range) & (secondsUntilFinish > Constants.PERIOD - Constants.ADVERTISING_INTERVAL*3 - range)) {
                     Log.i(TAG,"here");
                     taskAdvertise(3);
                     advertisePeriodEnd = true;
-                } else if (advertisePeriodEnd){
+                } else if (advertisePeriodEnd  && ( secondsUntilFinish < Constants.PERIOD - Constants.ADVERTISING_INTERVAL*4 + range) & (secondsUntilFinish > Constants.PERIOD - Constants.ADVERTISING_INTERVAL*4 - range)){
                     if (!ScannerService.running){
                         taskScan();
                         randomizeBitmaps();
@@ -150,9 +150,6 @@ public class AttendanceTaking extends AppCompatActivity{
 
         labelTextView = findViewById(R.id.textView4);
         dataTextView = findViewById(R.id.textView3);
-//        lowFreqButton = findViewById(R.id.lowButton);
-//        balancedFreqButton = findViewById(R.id.balancedButton);
-//        highFreqButton = findViewById(R.id.highButton);
         moduleLocationTextView = findViewById(R.id.moduleLocation);
 
         //set page number

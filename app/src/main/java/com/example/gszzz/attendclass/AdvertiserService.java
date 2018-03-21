@@ -33,20 +33,20 @@ public class AdvertiserService extends Service {
      * This is the best practice method as defined here:
      * https://groups.google.com/forum/#!topic/android-developers/jEvXMWgbgzE
      */
-    public static boolean running = false;
+    protected static boolean running = false;
 
-    public static final String ADVERTISING_FAILED =
+    protected static final String ADVERTISING_FAILED =
             "com.example.gszzz.attendclass.advertising_failed";
-    public static final String ADVERTISING_FAILED_EXTRA_CODE = "failureCode";
-    public static final int ADVERTISING_TIMED_OUT = 6;
+    protected static final String ADVERTISING_FAILED_EXTRA_CODE = "failureCode";
+    protected static final int ADVERTISING_TIMED_OUT = 6;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private AdvertiseCallback mAdvertiseCallback;
     private Handler mHandler;
     private Runnable timeoutRunnable;
     private byte[] advertisingData = null;
-    public static int powerLevel;
+    private static int powerLevel;
 
-    private static final String TAG = "AdvertiserService";
+    protected static final String TAG = "AdvertiserService";
 
     /**
      * Length of time to allow advertising before automatically shutting off. (5 minutes)
@@ -64,7 +64,7 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         advertisingData = intent.getByteArrayExtra("bitmap");
-        powerLevel = intent.getIntExtra("power", 1);
+        powerLevel = intent.getIntExtra("power", 0);
 //        Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
