@@ -16,12 +16,13 @@
         android:textSize="25dp"/>
 
     <Button
-        android:id="@+id/addButton"
+        android:id="@+id/retrieveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add module"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="retrieveButtonOnclick"
+        android:text="Retrieve" />
 
     <TableLayout
         android:layout_width="match_parent"
@@ -30,7 +31,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_below="@+id/Timetable"
-        android:layout_above="@+id/addButton"
+        android:layout_above="@+id/retrieveButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
