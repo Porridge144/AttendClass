@@ -52,32 +52,4 @@
         android:text="Timer"
         android:textSize="18sp" />
 
-    <Button
-        android:id="@+id/lowButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/balancedButton"
-        android:layout_alignBottom="@+id/balancedButton"
-        android:onClick="lowFreqOnClicked"
-        android:text="Low Frequency" />
-
-    <Button
-        android:id="@+id/balancedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="330dp"
-        android:layout_centerHorizontal="true"
-        android:onClick="balancedOnClicked"
-        android:text="Balanced" />
-
-    <Button
-        android:id="@+id/highButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/balancedButton"
-        android:layout_alignBottom="@+id/balancedButton"
-        android:layout_alignParentEnd="true"
-        android:onClick="highFreqOnClicked"
-        android:text="High Frequency" />
-
 </RelativeLayout>

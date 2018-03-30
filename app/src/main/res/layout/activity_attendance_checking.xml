@@ -35,15 +35,6 @@
         android:textColorHighlight="@android:color/holo_red_dark"
         android:textSize="20dp" />
 
-    <Button
-        android:id="@+id/stopScanningTempButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/balancedButton"
-        android:layout_centerHorizontal="true"
-        android:onClick="stopScanningOnClicked"
-        android:text="See Rx Power" />
-
     <TextView
         android:id="@+id/Greeting"
         android:layout_width="wrap_content"
@@ -55,15 +46,6 @@
         android:textSize="25dp" />
 
     <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView6"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="52dp"
-        android:text="Bitmap" />
-
-    <TextView
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,32 +53,11 @@
         android:layout_centerHorizontal="true"
         android:text="Time" />
 
-    <Button
-        android:id="@+id/lowButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/balancedButton"
-        android:layout_alignBottom="@+id/balancedButton"
-        android:onClick="lowFreqOnClicked"
-        android:text="Low Frequency" />
-
-    <Button
-        android:id="@+id/balancedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="390dp"
-        android:layout_centerHorizontal="true"
-        android:onClick="balancedOnClicked"
-        android:text="Balanced" />
-
-    <Button
-        android:id="@+id/highButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/balancedButton"
-        android:layout_alignBottom="@+id/balancedButton"
-        android:layout_alignParentEnd="true"
-        android:onClick="highFreqOnClicked"
-        android:text="High Frequency" />
+    <ListView
+        android:id="@+id/devicesListView"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView6" />
 
 </RelativeLayout>

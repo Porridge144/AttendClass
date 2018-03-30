@@ -1,8 +1,10 @@
 package com.example.gszzz.attendclass.server_interaction;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.gszzz.attendclass.Constants;
@@ -94,10 +96,17 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
     @Override
     protected void onPostExecute(String result) {
 //        super.onPostExecute(result);1111
-        Toast.makeText(ctx, result, Toast.LENGTH_LONG).show();
+//        Toast.makeText(ctx, result, Toast.LENGTH_LONG).show();
 
         String[] currentClassInfoArray = result.split(":");
         String className = currentClassInfoArray[0];
+        Log.i("res: ", result);
 
+        Intent i = new Intent();
+        i.setAction("classDataReceived");
+        i.putExtra("className", className);
+        i.putExtra("nameList", currentClassInfoArray);
+        Log.i("res: ", currentClassInfoArray.toString());
+        ctx.sendBroadcast(i);
     }
 }

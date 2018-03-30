@@ -123,7 +123,7 @@ public class AttendanceTaking extends AppCompatActivity{
                 } else if (advertisePeriodEnd  && ( secondsUntilFinish < Constants.PERIOD - Constants.ADVERTISING_INTERVAL*4 + range) & (secondsUntilFinish > Constants.PERIOD - Constants.ADVERTISING_INTERVAL*4 - range)){
                     if (!ScannerService.running){
                         taskScan();
-                        randomizeBitmaps();
+//                        randomizeBitmaps();
                     }
                 }
             }
@@ -151,11 +151,13 @@ public class AttendanceTaking extends AppCompatActivity{
         bitmap11.set(0);
         bitmap11.set(1);
 
-        randomizeBitmaps();
+//        randomizeBitmaps();
 
         scanResults = new ArrayList<>();
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
+        filter = new IntentFilter("classDataReceived");
+        registerReceiver(classDataReceiver, filter);
 
         advertisingFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -234,8 +236,8 @@ public class AttendanceTaking extends AppCompatActivity{
                         // Everything is supported and enabled...
                         checkBTPermissions();
 
-                        startTime = System.currentTimeMillis();
-                        handler.post(runnableCode);
+//                        startTime = System.currentTimeMillis();
+//                        handler.post(runnableCode);
 
                     } else {
 
@@ -270,8 +272,8 @@ public class AttendanceTaking extends AppCompatActivity{
                         // Everything is supported and enabled...
                         checkBTPermissions();
 
-                        startTime = System.currentTimeMillis();
-                        handler.post(runnableCode);
+//                        startTime = System.currentTimeMillis();
+//                        handler.post(runnableCode);
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -473,20 +475,20 @@ public class AttendanceTaking extends AppCompatActivity{
         Log.i(TAG, "activity paused");
     }
 
-    public void lowFreqOnClicked(View view){
-        stopAdvertising();
-        powerLevel = 0;
-    }
-
-    public void balancedOnClicked(View view){
-        stopAdvertising();
-        powerLevel = 1;
-    }
-
-    public void highFreqOnClicked(View view){
-        stopAdvertising();
-        powerLevel = 2;
-    }
+//    public void lowFreqOnClicked(View view){
+//        stopAdvertising();
+//        powerLevel = 0;
+//    }
+//
+//    public void balancedOnClicked(View view){
+//        stopAdvertising();
+//        powerLevel = 1;
+//    }
+//
+//    public void highFreqOnClicked(View view){
+//        stopAdvertising();
+//        powerLevel = 2;
+//    }
 
     private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
         @Override
@@ -568,6 +570,26 @@ public class AttendanceTaking extends AppCompatActivity{
                 } catch (Exception e) {
                     Toast.makeText(getApplicationContext(), "AttendanceTaking: " + e.toString(), Toast.LENGTH_SHORT).show();
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver classDataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("classDataReceived")){
+                String className = intent.getStringExtra("className");
+                String[] nameList = intent.getStringArrayExtra("nameList");
+                for (int i=1;i<nameList.length;i++){
+                    String temp = (nameList[i].split(" "))[1];
+                    if (StudentLogIn.globalUsername.equals(temp)){
+                        bitmap00.set(i-1);
+                        break;
+                    }
+                }
+
+                startTime = System.currentTimeMillis();
+                handler.post(runnableCode);
             }
         }
     };

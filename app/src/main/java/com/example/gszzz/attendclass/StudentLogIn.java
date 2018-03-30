@@ -12,7 +12,6 @@ public class StudentLogIn extends AppCompatActivity {
     String username, password;
 
     public static String globalUsername = "";
-    public static String globalRelayUsername = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

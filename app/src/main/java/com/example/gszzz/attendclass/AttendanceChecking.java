@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -19,8 +20,15 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.gszzz.attendclass.server_interaction.BackgroundTaskRetrieveInfo;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -34,7 +42,10 @@ public class AttendanceChecking extends AppCompatActivity{
     private TextView totalNumTextView;
     private TextView bitmapTextView;
     private TextView timerTextView;
+    private ListView listView;
     private ArrayList<ScanResult> scanResults;
+    private static ArrayList<String> names = new ArrayList();
+    private static ArrayList<String> absentNames = new ArrayList();
     private BitSet bitmap00 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
     private BitSet bitmap01 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
     private BitSet bitmap10 = new BitSet(Constants.MAX_NUMBER_OF_BITS); // at most 20 bytes
@@ -85,7 +96,31 @@ public class AttendanceChecking extends AppCompatActivity{
 
             if (secondsUntilFinish%2 < 1 + range && secondsUntilFinish%2 > 1 - range && presentStuNumber!=Constants.STUDENTS) {
                 presentStuNumber = bitmap00.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap01.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap10.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap11.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality();
-                bitmapTextView.setText(String.format("Absent Student Number: %d", Constants.STUDENTS - presentStuNumber));
+//                bitmapTextView.setText(String.format("Absent Student Number: %d", Constants.STUDENTS - presentStuNumber));
+                absentNames.clear();
+                Log.i("names", names.toString());
+                for(int i=2;i<Constants.MAX_NUMBER_OF_BITS;i++){
+                    if(!bitmap00.get(i)){
+                        absentNames.add(names.get(i-2));
+                    }
+                }
+                for(int i=2;i<Constants.MAX_NUMBER_OF_BITS;i++){
+                    if(!bitmap01.get(i)){
+                        absentNames.add(names.get(i-2));
+                    }
+                }
+                for(int i=2;i<Constants.MAX_NUMBER_OF_BITS;i++){
+                    if(!bitmap10.get(i)){
+                        absentNames.add(names.get(i-2));
+                    }
+                }
+                for(int i=2;i<Constants.MAX_NUMBER_OF_BITS;i++){
+                    if(!bitmap11.get(i)){
+                        absentNames.add(names.get(i-2));
+                    }
+                }
+                ListAdapter listAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, absentNames);
+                listView.setAdapter(listAdapter);
             }
             if (presentStuNumber == Constants.STUDENTS){
                 Toast.makeText(getApplicationContext(), "All students here!", Toast.LENGTH_LONG).show();
@@ -110,10 +145,12 @@ public class AttendanceChecking extends AppCompatActivity{
         scanResults = new ArrayList<>();
         totalNumTextView = findViewById(R.id.totalNumTextView);
         timerTextView = findViewById(R.id.textView6);
-        bitmapTextView = findViewById(R.id.textView5);
+        listView =  findViewById(R.id.devicesListView);
 
-//        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-//        registerReceiver(scanResultsReceiver, filter);
+        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+        registerReceiver(scanResultsReceiver, filter);
+        IntentFilter filter1 = new IntentFilter("classDataReceived");
+        registerReceiver(classDataReceiver, filter1);
 
         // set page number
         bitmap01.set(1);
@@ -122,8 +159,8 @@ public class AttendanceChecking extends AppCompatActivity{
         bitmap11.set(1);
 
         // format: Fri Mar 30 14:45:12 GMT+08:00 2018
-        Date currentTime = Calendar.getInstance().getTime();
-        Log.i("date: ", currentTime.toString());
+//        Date currentTime = Calendar.getInstance().getTime();
+//        Log.i("date: ", currentTime.toString());
 
 
         scanningFailureReceiver = new BroadcastReceiver() {
@@ -171,11 +208,12 @@ public class AttendanceChecking extends AppCompatActivity{
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled
                         checkBTPermissions();
-                        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-                        registerReceiver(scanResultsReceiver, filter);
-                        startTime = System.currentTimeMillis();
-                        handler.post(runnableCode);
-                        startScanning();
+
+//                        startTime = System.currentTimeMillis();
+//                        handler.post(runnableCode);
+                        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
+                        backgroundTaskRetrieveInfo.execute("query_class_list");
+//                        startScanning();
 //                        Log.i(TAG, "after start scanning");
 //                        Toast.makeText(getApplicationContext(), "Start Scanning!!!", Toast.LENGTH_LONG).show();
                     } else {
@@ -213,12 +251,12 @@ public class AttendanceChecking extends AppCompatActivity{
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled
                         checkBTPermissions();
-                        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-                        registerReceiver(scanResultsReceiver, filter);
-                        startTime = System.currentTimeMillis();
-                        handler.post(runnableCode);
+                        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
+                        backgroundTaskRetrieveInfo.execute("query_class_list");
+//                        startTime = System.currentTimeMillis();
+//                        handler.post(runnableCode);
                         //Start service
-                        startScanning();
+//                        startScanning();
 //                        Log.i(TAG, "after start scanning");
 //                        Toast.makeText(getApplicationContext(), "Start Scanning!!!", Toast.LENGTH_LONG).show();
                     } else {
@@ -293,37 +331,37 @@ public class AttendanceChecking extends AppCompatActivity{
         startActivity(intent);
     }
 
-    public void lowFreqOnClicked(View view){
-        stopScanning();
-        powerLevel = 0;
-        startScanning();
-    }
+//    public void lowFreqOnClicked(View view){
+//        stopScanning();
+//        powerLevel = 0;
+//        startScanning();
+//    }
+//
+//    public void balancedOnClicked(View view){
+//        stopScanning();
+//        powerLevel = 1;
+//        startScanning();
+//    }
+//
+//    public void highFreqOnClicked(View view){
+//        stopScanning();
+//        powerLevel = 2;
+//        startScanning();
+//    }
 
-    public void balancedOnClicked(View view){
-        stopScanning();
-        powerLevel = 1;
-        startScanning();
-    }
-
-    public void highFreqOnClicked(View view){
-        stopScanning();
-        powerLevel = 2;
-        startScanning();
-    }
-
-    public void stopScanningOnClicked(View view) {
-//        if (ScannerService.running) {
-//            Toast.makeText(getApplicationContext(), "Is running... Stopping the service...", Toast.LENGTH_SHORT).show();
-//            stopScanning();
+//    public void stopScanningOnClicked(View view) {
+////        if (ScannerService.running) {
+////            Toast.makeText(getApplicationContext(), "Is running... Stopping the service...", Toast.LENGTH_SHORT).show();
+////            stopScanning();
+////        }
+//        int i;
+//        int averageRxPower = 0;
+//        for(i=0; i<currentIndex; i++){
+//            averageRxPower += rssi[i];
 //        }
-        int i;
-        int averageRxPower = 0;
-        for(i=0; i<currentIndex; i++){
-            averageRxPower += rssi[i];
-        }
-        averageRxPower = averageRxPower /i;
-        Toast.makeText(getApplicationContext(), "Ave Rx power is: " + Integer.toString(averageRxPower), Toast.LENGTH_SHORT).show();
-    }
+//        averageRxPower = averageRxPower /i;
+//        Toast.makeText(getApplicationContext(), "Ave Rx power is: " + Integer.toString(averageRxPower), Toast.LENGTH_SHORT).show();
+//    }
 
     //Check for permission to discover other devices
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -404,6 +442,50 @@ public class AttendanceChecking extends AppCompatActivity{
                 } catch (Exception e) {
                     Toast.makeText(getApplicationContext(), "AttendanceChecking: " + e.toString(), Toast.LENGTH_SHORT).show();
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver classDataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("classDataReceived")){
+                String className = intent.getStringExtra("className");
+                String[] nameList = intent.getStringArrayExtra("nameList");
+                BitSet bitmap = new BitSet(Constants.STUDENTS);
+                for(int i=1;i<nameList.length;i++){
+                    names.add((nameList[i].split(" "))[0]);
+                }
+                Log.i("names", names.toString());
+                absentNames = names;
+//                bitmap.get(0,Constants.MAX_NUMBER_OF_BITS-2).or(bitmap00.get(2,Constants.MAX_NUMBER_OF_BITS));
+//                bitmap.get(Constants.MAX_NUMBER_OF_BITS-2,(Constants.MAX_NUMBER_OF_BITS-2)*2).or(bitmap01.get(2,Constants.MAX_NUMBER_OF_BITS));
+//                bitmap.get((Constants.MAX_NUMBER_OF_BITS-2)*2,(Constants.MAX_NUMBER_OF_BITS-2)*3).or(bitmap10.get(2,Constants.MAX_NUMBER_OF_BITS));
+//                bitmap.get((Constants.MAX_NUMBER_OF_BITS-2)*3,(Constants.MAX_NUMBER_OF_BITS-2)*4).or(bitmap11.get(2,Constants.MAX_NUMBER_OF_BITS));
+                for(int i=nameList.length; i<=Constants.STUDENTS;i++){
+                    bitmap.set(i-1);
+                }
+                Log.i("bitmap", bitmap.toString());
+                BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS-2);
+                for(int i=0;i<Constants.STUDENTS;i++){
+                    if(bitmap.get(i)){
+                        if(i<Constants.MAX_NUMBER_OF_BITS-2)
+                            bitmap00.set(i+2);
+                        else if(i<(Constants.MAX_NUMBER_OF_BITS-2)*2)
+                            bitmap01.set(i%(Constants.MAX_NUMBER_OF_BITS-2)+2);
+                        else if(i<(Constants.MAX_NUMBER_OF_BITS-2)*3)
+                            bitmap10.set(i%(Constants.MAX_NUMBER_OF_BITS-2)+2);
+                        else if(i<(Constants.MAX_NUMBER_OF_BITS-2)*4)
+                            bitmap11.set(i%(Constants.MAX_NUMBER_OF_BITS-2)+2);
+                    }
+                }
+                Log.i("00: ", bitmap00.toString());
+                Log.i("01: ", bitmap01.toString());
+                Log.i("10: ", bitmap10.toString());
+                Log.i("11: ", bitmap11.toString());
+                startTime = System.currentTimeMillis();
+                handler.post(runnableCode);
+//                startScanning();
             }
         }
     };
