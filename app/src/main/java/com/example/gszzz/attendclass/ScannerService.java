@@ -15,7 +15,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;

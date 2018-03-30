@@ -39,7 +39,7 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
     @Override
     protected String doInBackground(String... params) {
 //------------------------------Change Server IP HERE---------------------------------------
-        String classInfoQueryUrl = "http://121.7.122.74:8081/attendance/classinfo_query.php";
+        String classInfoQueryUrl = "http://192.168.0.104:8081/attendance/classinfo_query.php";
 //        String classInfoQueryUrl = "http://121.7.122.74:8081/attendance/classinfo_query.php";
 //------------------------------------------------------------------------------------------
         String method = params[0];

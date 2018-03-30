@@ -12,14 +12,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.ParcelUuid;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class AdvertiserService extends Service {
