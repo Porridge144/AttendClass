@@ -3,6 +3,9 @@ package com.example.gszzz.attendclass;
 import android.os.ParcelUuid;
 
 public class Constants {
+
+    public static final String CLASS_INFO_QUERY_URL = "http://121.7.122.74:8081/attendance/classinfo_query.php";
+
     public static final ParcelUuid Service_UUID = ParcelUuid.fromString("0000a90e-0000-1000-8000-00805f9b34fb");
 
     public static final int REQUEST_ENABLE_BT = 1;
