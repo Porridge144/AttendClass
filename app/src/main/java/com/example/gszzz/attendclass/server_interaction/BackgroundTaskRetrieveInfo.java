@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import com.example.gszzz.attendclass.Constants;
 import com.example.gszzz.attendclass.LecturerLogIn;
 import com.example.gszzz.attendclass.LecturerMenu;
 
@@ -39,7 +40,7 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
     @Override
     protected String doInBackground(String... params) {
 //------------------------------Change Server IP HERE---------------------------------------
-        String classInfoQueryUrl = "http://192.168.0.104:8081/attendance/classinfo_query.php";
+        String classInfoQueryUrl = Constants.CLASS_INFO_QUERY_URL;
 //        String classInfoQueryUrl = "http://121.7.122.74:8081/attendance/classinfo_query.php";
 //------------------------------------------------------------------------------------------
         String method = params[0];
@@ -94,5 +95,9 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
     protected void onPostExecute(String result) {
 //        super.onPostExecute(result);1111
         Toast.makeText(ctx, result, Toast.LENGTH_LONG).show();
+
+        String[] currentClassInfoArray = result.split(":");
+        String className = currentClassInfoArray[0];
+
     }
 }

@@ -1,10 +1,10 @@
 package com.example.gszzz.attendclass;
 
 import android.os.ParcelUuid;
-import java.util.Random;
 
 public class Constants {
-    private static Random r = new Random();
+
+    public static final String CLASS_INFO_QUERY_URL = "http://121.7.122.74:8081/attendance/classinfo_query.php";
 
     public static final ParcelUuid Service_UUID = ParcelUuid.fromString("0000a90e-0000-1000-8000-00805f9b34fb");
 
@@ -12,9 +12,9 @@ public class Constants {
 
     public static final int MAX_NUMBER_OF_BITS = 6;  // number of bits of one bitmap
 
-    public static final int ADVERTISING_INTERVAL = 4; // time for advertising one bitmap
+    public static final int BIAS = 4; // bias time added before starting to advertise
 
-    public static final int BIAS = r.nextInt(ADVERTISING_INTERVAL*1000); // bias time (ms) added before starting to advertise
+    public static final int ADVERTISING_INTERVAL = 2; // time for advertising one bitmap
 
     public static final int SCANNING_INTERVAL = 4; // time for scanning
 
