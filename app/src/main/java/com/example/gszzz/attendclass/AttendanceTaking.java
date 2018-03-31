@@ -581,13 +581,21 @@ public class AttendanceTaking extends AppCompatActivity{
                 String className = intent.getStringExtra("className");
                 String[] nameList = intent.getStringArrayExtra("nameList");
                 for (int i=1;i<nameList.length;i++){
+                    // temp is the matric no being looped thu
                     String temp = (nameList[i].split(" "))[1];
                     if (StudentLogIn.globalUsername.equals(temp)){
-                        bitmap00.set(i-1);
+                        // set the specific bit to 1
+                        if(i<=Constants.MAX_NUMBER_OF_BITS-2)
+                            bitmap00.set(i+1);
+                        else if(i<=2*(Constants.MAX_NUMBER_OF_BITS-2))
+                            bitmap01.set(i+1-(Constants.MAX_NUMBER_OF_BITS-2));
+                        else if(i<=3*(Constants.MAX_NUMBER_OF_BITS-2))
+                            bitmap10.set(i+1-2*(Constants.MAX_NUMBER_OF_BITS-2));
+                        else
+                            bitmap11.set(i+1-3*(Constants.MAX_NUMBER_OF_BITS-2));
                         break;
                     }
                 }
-
                 startTime = System.currentTimeMillis();
                 handler.post(runnableCode);
             }
