@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="78dp"
-        android:text="Currently involvde in"
+        android:text="Greeting"
         android:textSize="23sp" />
 
     <TextView
@@ -21,8 +21,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/defaultText"
         android:layout_centerHorizontal="true"
-        android:text="EE1001"
-        android:textSize="30sp" />
+        android:autoText="false"
+        android:background="@android:color/transparent"
+        android:hint="EE"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/moduleLocation"
@@ -30,8 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/moduleInfo"
         android:layout_centerHorizontal="true"
-        android:text="At E5-04-21"
-        android:textSize="27sp" />
+        android:text="Advertised times"
+        android:textSize="30sp" />
 
     <TextView
         android:id="@+id/textView3"
@@ -46,9 +48,9 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/moduleLocation"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="21dp"
+        android:layout_marginBottom="68dp"
         android:text="Timer"
         android:textSize="18sp" />
 

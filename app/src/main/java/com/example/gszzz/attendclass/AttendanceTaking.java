@@ -36,8 +36,10 @@ public class AttendanceTaking extends AppCompatActivity{
     private BroadcastReceiver advertisingFailureReceiver;
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
+    private TextView defaultTextView;
     private TextView labelTextView;
     private TextView moduleLocationTextView;
+    private TextView moduleInfoTextView;
     private TextView dataTextView;
     private ArrayList<ScanResult> scanResults;
     private boolean restIndicator = false;
@@ -50,6 +52,8 @@ public class AttendanceTaking extends AppCompatActivity{
     private BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     private static int advertisedTimes = 0;
     private int scannedTimes = 0;
+    private String matricNum;
+    private String myName;
     private static int powerLevel = 0;
     private int currentIndex = 0;
     private long startTime = 0;
@@ -146,7 +150,9 @@ public class AttendanceTaking extends AppCompatActivity{
 
         labelTextView = findViewById(R.id.textView4);
         dataTextView = findViewById(R.id.textView3);
+        defaultTextView = findViewById(R.id.defaultText);
         moduleLocationTextView = findViewById(R.id.moduleLocation);
+        moduleInfoTextView = findViewById(R.id.moduleInfo);
 
         //set page number
         bitmap01.set(1);
@@ -559,11 +565,14 @@ public class AttendanceTaking extends AppCompatActivity{
             if (intent.getAction().equals("classDataReceived")){
                 String className = intent.getStringExtra("className");
                 String[] nameList = intent.getStringArrayExtra("nameList");
+                moduleInfoTextView.setText(String.format("Welcome to %s", className));
                 Log.i("length of nameList: ", Integer.toString(nameList.length));
                 for (int i=1;i<nameList.length;i++){
                     // temp is the matric no being looped thru
-                    String matricNum = (nameList[i].split(" "))[1];
+                    matricNum = (nameList[i].split(" "))[1];
                     if (StudentLogIn.globalUsername.equals(matricNum)){
+                        myName = (nameList[i].split(" "))[0];
+                        defaultTextView.setText(String.format("Hi %s(%s)", myName, matricNum));
                         // set the specific bit to 1
                         if(i<=Constants.MAX_NUMBER_OF_BITS-2)
                             bitmap00.set(i+1);

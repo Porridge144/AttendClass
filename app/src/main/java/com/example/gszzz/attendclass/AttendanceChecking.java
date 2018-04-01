@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -19,9 +21,12 @@ import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,9 +45,10 @@ public class AttendanceChecking extends AppCompatActivity{
     private BroadcastReceiver scanningFailureReceiver;
     private BluetoothAdapter mBluetoothAdapter;
     private TextView totalNumTextView;
-    private TextView bitmapTextView;
     private TextView timerTextView;
+    private TextView moduleInfoTextView;
     private ListView listView;
+    private ArrayAdapter listAdapter;
     private ArrayList<ScanResult> scanResults;
     private static ArrayList<String> names;
     private static ArrayList<String> absentNames;
@@ -92,26 +98,30 @@ public class AttendanceChecking extends AppCompatActivity{
 
             timerTextView.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 
-            if (secondsUntilFinish%2 < 1 + range && secondsUntilFinish%2 > 1 - range && presentStuNumber!=Constants.STUDENTS) {
-                presentStuNumber = bitmap00.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap01.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap10.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap11.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality();
-//                bitmapTextView.setText(String.format("Absent Student Number: %d", Constants.STUDENTS - presentStuNumber));
-                // save index and top position
-                int index = listView.getFirstVisiblePosition(); //This changed
-                View v = listView.getChildAt(0);
-                int top = (v == null) ? 0 : v.getTop(); //this changed
-
-                // notify dataset changed or re-assign adapter here
-                ListAdapter listAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, absentNames);
-                listView.setAdapter(listAdapter);
-                // restore the position of listview
-                listView.setSelectionFromTop(index, top);
-
+            if (secondsUntilFinish%2 < 1 + range && secondsUntilFinish%2 > 1 - range) {
+                if(names.size()==0) {
+                    Toast.makeText(getApplicationContext(), "No students enrolled", Toast.LENGTH_LONG).show();
+                    stopScanning();
+                }
+                else{
+                    presentStuNumber = bitmap00.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap01.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap10.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap11.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality();
+                    // save index and top position
+                    int index = listView.getFirstVisiblePosition(); //This changed
+                    View v = listView.getChildAt(0);
+                    int top = (v == null) ? 0 : v.getTop(); //this changed
+                    // notify dataset changed or re-assign adapter here
+//                    listAdapter.notifyDataSetChanged();
+                    listView.setAdapter(listAdapter);
+                    // restore the position of listview
+                    listAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, absentNames);
+                    listView.setSelectionFromTop(index, top);
+                    totalNumTextView.setText(String.format("%d/%d", presentStuNumber, names.size()));
+                    if (presentStuNumber == names.size()){
+                        Toast.makeText(getApplicationContext(), "All students here!", Toast.LENGTH_LONG).show();
+                        onFinish();
+                    }
+                }
             }
-            if (presentStuNumber == names.size()){
-                Toast.makeText(getApplicationContext(), "All students here!", Toast.LENGTH_LONG).show();
-                secondsUntilFinish = 0;
-            }
-//
         }
         @Override
         public void onFinish() {
@@ -132,7 +142,10 @@ public class AttendanceChecking extends AppCompatActivity{
         absentNames = new ArrayList<>();
         totalNumTextView = findViewById(R.id.totalNumTextView);
         timerTextView = findViewById(R.id.textView6);
-        listView =  findViewById(R.id.devicesListView);
+        listView = findViewById(R.id.devicesListView);
+        moduleInfoTextView = findViewById(R.id.moduleInfo);
+//        listAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, absentNames);
+//        listView.setAdapter(listAdapter);
 
         IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filter);
@@ -369,45 +382,36 @@ public class AttendanceChecking extends AppCompatActivity{
                         temp.xor(bitmap00.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
                         if (temp.isEmpty()) {
-                            Log.i(TAG, "relayed bitmap empty");
                         } else {
                             bitmap00.or(relayedBitmap);
-                            Log.i(TAG, "OR-ing bitmap 0");
                         }
                     } else if (!relayedBitmap.get(0) && relayedBitmap.get(1)) {
                         // 01 = false true
                         temp.xor(bitmap01.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
                         if (temp.isEmpty()) {
-                            Log.i(TAG, "relayed bitmap empty");
                         } else {
                             bitmap01.or(relayedBitmap);
-                            Log.i(TAG, "OR-ing bitmap 1");
                         }
                     } else if (relayedBitmap.get(0) && !relayedBitmap.get(1)) {
                         // 10 = true false
                         temp.xor(bitmap10.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
                         if (temp.isEmpty()) {
-                            Log.i(TAG, "relayed bitmap empty");
                         } else {
                             bitmap10.or(relayedBitmap);
-                            Log.i(TAG, "OR-ing bitmap 2");
                         }
                     } else if (relayedBitmap.get(0) && relayedBitmap.get(1)) {
                         // 11 = true true
                         temp.xor(bitmap11.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
                         if (temp.isEmpty()) {
-                            Log.i(TAG, "relayed bitmap empty");
                         } else {
                             bitmap11.or(relayedBitmap);
-                            Log.i(TAG, "OR-ing bitmap 3");
                         }
                     }
                     countNames();
                     String totalNumber = " " + scanResults.size() + " ";
-                    totalNumTextView.setText(Integer.toString(currentIndex+1));
                 } catch (Resources.NotFoundException e) {
                     Toast.makeText(getApplicationContext(), "AttendanceChecking: NotFoundException...", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
@@ -423,6 +427,7 @@ public class AttendanceChecking extends AppCompatActivity{
             if (intent.getAction().equals("classDataReceived")){
                 String className = intent.getStringExtra("className");
                 String[] nameList = intent.getStringArrayExtra("nameList");
+                moduleInfoTextView.setText(String.format("Welcome to %s", className));
                 for(int i=1;i<nameList.length;i++){
                     names.add((nameList[i].split(" "))[0]);
                 }
@@ -438,7 +443,10 @@ public class AttendanceChecking extends AppCompatActivity{
 
                 startTime = System.currentTimeMillis();
                 handler.post(runnableCode);
-                startScanning();
+                if(nameList.length>1)
+                    startScanning();
+                else
+                    totalNumTextView.setText("No students retrieved in this class");
             }
         }
     };
