@@ -22,6 +22,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.gszzz.attendclass.server_interaction.BackgroundTaskRetrieveInfo;
+
 import java.util.BitSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +153,6 @@ public class AttendanceTaking extends AppCompatActivity{
         bitmap10.set(0);
         bitmap11.set(0);
         bitmap11.set(1);
-
 //        randomizeBitmaps();
 
         scanResults = new ArrayList<>();
@@ -236,9 +238,8 @@ public class AttendanceTaking extends AppCompatActivity{
                         // Everything is supported and enabled...
                         checkBTPermissions();
 
-//                        startTime = System.currentTimeMillis();
-//                        handler.post(runnableCode);
-
+                        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
+                        backgroundTaskRetrieveInfo.execute("query_class_list");
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -271,9 +272,8 @@ public class AttendanceTaking extends AppCompatActivity{
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
                         checkBTPermissions();
-
-//                        startTime = System.currentTimeMillis();
-//                        handler.post(runnableCode);
+                        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
+                        backgroundTaskRetrieveInfo.execute("query_class_list");
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -351,16 +351,10 @@ public class AttendanceTaking extends AppCompatActivity{
         Log.i(TAG,"scan");
     }
 
-
     private void startAdvertising(String pageNumber) {
         Context c = getApplicationContext();
         c.startService(getAdvertiseServiceIntent(c, pageNumber));
     }
-
-//    private void startAdvertising() {
-//        Context c = getApplicationContext();
-//        c.startService(getAdvertiseServiceIntent(c));
-//    }
 
     private void stopAdvertising() {
         Context c = getApplicationContext();
@@ -475,21 +469,6 @@ public class AttendanceTaking extends AppCompatActivity{
         Log.i(TAG, "activity paused");
     }
 
-//    public void lowFreqOnClicked(View view){
-//        stopAdvertising();
-//        powerLevel = 0;
-//    }
-//
-//    public void balancedOnClicked(View view){
-//        stopAdvertising();
-//        powerLevel = 1;
-//    }
-//
-//    public void highFreqOnClicked(View view){
-//        stopAdvertising();
-//        powerLevel = 2;
-//    }
-
     private final BroadcastReceiver scanResultsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -580,10 +559,11 @@ public class AttendanceTaking extends AppCompatActivity{
             if (intent.getAction().equals("classDataReceived")){
                 String className = intent.getStringExtra("className");
                 String[] nameList = intent.getStringArrayExtra("nameList");
+                Log.i("length of nameList: ", Integer.toString(nameList.length));
                 for (int i=1;i<nameList.length;i++){
-                    // temp is the matric no being looped thu
-                    String temp = (nameList[i].split(" "))[1];
-                    if (StudentLogIn.globalUsername.equals(temp)){
+                    // temp is the matric no being looped thru
+                    String matricNum = (nameList[i].split(" "))[1];
+                    if (StudentLogIn.globalUsername.equals(matricNum)){
                         // set the specific bit to 1
                         if(i<=Constants.MAX_NUMBER_OF_BITS-2)
                             bitmap00.set(i+1);
@@ -596,6 +576,10 @@ public class AttendanceTaking extends AppCompatActivity{
                         break;
                     }
                 }
+                Log.i("00: ", bitmap00.toString());
+                Log.i("01: ", bitmap01.toString());
+                Log.i("10: ", bitmap10.toString());
+                Log.i("11: ", bitmap11.toString());
                 startTime = System.currentTimeMillis();
                 handler.post(runnableCode);
             }

@@ -97,6 +97,7 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
     protected void onPostExecute(String result) {
 //        super.onPostExecute(result);1111
 //        Toast.makeText(ctx, result, Toast.LENGTH_LONG).show();
+        Log.i("before splitting", result);
 
         String[] currentClassInfoArray = result.split(":");
         String className = currentClassInfoArray[0];

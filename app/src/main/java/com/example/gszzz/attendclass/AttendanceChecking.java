@@ -95,8 +95,17 @@ public class AttendanceChecking extends AppCompatActivity{
             if (secondsUntilFinish%2 < 1 + range && secondsUntilFinish%2 > 1 - range && presentStuNumber!=Constants.STUDENTS) {
                 presentStuNumber = bitmap00.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap01.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap10.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality() + bitmap11.get(2,Constants.MAX_NUMBER_OF_BITS).cardinality();
 //                bitmapTextView.setText(String.format("Absent Student Number: %d", Constants.STUDENTS - presentStuNumber));
+                // save index and top position
+                int index = listView.getFirstVisiblePosition(); //This changed
+                View v = listView.getChildAt(0);
+                int top = (v == null) ? 0 : v.getTop(); //this changed
+
+                // notify dataset changed or re-assign adapter here
                 ListAdapter listAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, absentNames);
                 listView.setAdapter(listAdapter);
+                // restore the position of listview
+                listView.setSelectionFromTop(index, top);
+
             }
             if (presentStuNumber == names.size()){
                 Toast.makeText(getApplicationContext(), "All students here!", Toast.LENGTH_LONG).show();
@@ -429,7 +438,7 @@ public class AttendanceChecking extends AppCompatActivity{
 
                 startTime = System.currentTimeMillis();
                 handler.post(runnableCode);
-//                startScanning();
+                startScanning();
             }
         }
     };

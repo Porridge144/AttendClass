@@ -58,15 +58,14 @@ public class ScannerService extends Service {
     @Override
     public void onCreate() {
         running = true;
-        scanResults = new ArrayList<>();
+//        scanResults = new ArrayList<>();
         initialize();
-//        startScanning();
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        scanResults = new ArrayList<>();
+        scanResults = new ArrayList<>();
         powerLevel = intent.getIntExtra("power", 2);
         startScanning();
         return super.onStartCommand(intent, flags, startId);
