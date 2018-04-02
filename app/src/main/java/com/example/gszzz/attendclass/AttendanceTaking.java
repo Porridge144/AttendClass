@@ -51,7 +51,6 @@ public class AttendanceTaking extends AppCompatActivity{
     private BitSet relayedBitmap = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     private BitSet temp = new BitSet(Constants.MAX_NUMBER_OF_BITS);
     private static int advertisedTimes = 0;
-    private int scannedTimes = 0;
     private String matricNum;
     private String myName;
     private static int powerLevel = 0;
@@ -570,9 +569,9 @@ public class AttendanceTaking extends AppCompatActivity{
                 for (int i=1;i<nameList.length;i++){
                     // temp is the matric no being looped thru
                     matricNum = (nameList[i].split(" "))[1];
-                    if (StudentLogIn.globalUsername.equals(matricNum)){
+                    if (StudentTab.globalUsername.equals(matricNum)){
                         myName = (nameList[i].split(" "))[0];
-                        defaultTextView.setText(String.format("Hi %s(%s)", myName, matricNum));
+                        defaultTextView.setText(String.format("Hi %s (%s)", myName, matricNum));
                         // set the specific bit to 1
                         if(i<=Constants.MAX_NUMBER_OF_BITS-2)
                             bitmap00.set(i+1);

@@ -1,15 +1,11 @@
 package com.example.gszzz.attendclass.server_interaction;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.gszzz.attendclass.Constants;
-import com.example.gszzz.attendclass.LecturerLogIn;
-import com.example.gszzz.attendclass.LecturerMenu;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,7 +39,6 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
     protected String doInBackground(String... params) {
 //------------------------------Change Server IP HERE---------------------------------------
         String classInfoQueryUrl = Constants.CLASS_INFO_QUERY_URL;
-//        String classInfoQueryUrl = "http://121.7.122.74:8081/attendance/classinfo_query.php";
 //------------------------------------------------------------------------------------------
         String method = params[0];
         if (method.equals("query_class_list")) {
@@ -83,8 +78,6 @@ public class BackgroundTaskRetrieveInfo extends AsyncTask<String, Void, String> 
             }
 
         }
-
-
         return null;
     }
 

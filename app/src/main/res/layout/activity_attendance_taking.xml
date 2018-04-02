@@ -12,8 +12,9 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="78dp"
-        android:text="Greeting"
-        android:textSize="23sp" />
+        android:text="@string/greeting"
+        android:textColor="@android:color/black"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/moduleInfo"
@@ -21,9 +22,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/defaultText"
         android:layout_centerHorizontal="true"
-        android:autoText="false"
         android:background="@android:color/transparent"
-        android:hint="EE"
+        android:textColor="@android:color/black"
         android:textSize="20sp" />
 
     <TextView
@@ -32,7 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/moduleInfo"
         android:layout_centerHorizontal="true"
-        android:text="Advertised times"
+        android:text="@string/advertised_times"
+        android:textColor="@android:color/holo_green_dark"
         android:textSize="30sp" />
 
     <TextView
@@ -41,7 +42,6 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Advertising Data"
         android:textSize="20sp" />
 
     <TextView
@@ -51,7 +51,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="68dp"
-        android:text="Timer"
+        android:textColor="@android:color/holo_blue_light"
         android:textSize="18sp" />
 
 </RelativeLayout>

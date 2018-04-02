@@ -381,32 +381,28 @@ public class AttendanceChecking extends AppCompatActivity{
                         // 00 = false false
                         temp.xor(bitmap00.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
-                        if (temp.isEmpty()) {
-                        } else {
+                        if (!temp.isEmpty()) {
                             bitmap00.or(relayedBitmap);
                         }
                     } else if (!relayedBitmap.get(0) && relayedBitmap.get(1)) {
                         // 01 = false true
                         temp.xor(bitmap01.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
-                        if (temp.isEmpty()) {
-                        } else {
+                        if (!temp.isEmpty()) {
                             bitmap01.or(relayedBitmap);
                         }
                     } else if (relayedBitmap.get(0) && !relayedBitmap.get(1)) {
                         // 10 = true false
                         temp.xor(bitmap10.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
-                        if (temp.isEmpty()) {
-                        } else {
+                        if (!temp.isEmpty()) {
                             bitmap10.or(relayedBitmap);
                         }
                     } else if (relayedBitmap.get(0) && relayedBitmap.get(1)) {
                         // 11 = true true
                         temp.xor(bitmap11.get(2, Constants.MAX_NUMBER_OF_BITS));
                         // the two bitmaps are same
-                        if (temp.isEmpty()) {
-                        } else {
+                        if (!temp.isEmpty()) {
                             bitmap11.or(relayedBitmap);
                         }
                     }
@@ -427,7 +423,10 @@ public class AttendanceChecking extends AppCompatActivity{
             if (intent.getAction().equals("classDataReceived")){
                 String className = intent.getStringExtra("className");
                 String[] nameList = intent.getStringArrayExtra("nameList");
-                moduleInfoTextView.setText(String.format("Welcome to %s", className));
+                if(className.equals("No Class For Now"))
+                    moduleInfoTextView.setText("No Class For Now");
+                else
+                    moduleInfoTextView.setText(String.format("Welcome to %s", className));
                 for(int i=1;i<nameList.length;i++){
                     names.add((nameList[i].split(" "))[0]);
                 }

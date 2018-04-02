@@ -22,23 +22,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Initial">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".StudentLogIn" />
-        <activity android:name=".LecturerLogIn" />
-        <activity android:name=".StudentRegister" />
         <activity android:name=".LecturerRegister" />
         <activity android:name=".AttendanceTaking" />
-        <activity android:name=".LecturerMenu" />
         <activity android:name=".AttendanceChecking" />
         <activity android:name=".TimetableManagement" />
         <activity android:name=".NameList" />
-        <activity android:name=".StudentRegisterForClass" />
 
         <service
             android:name=".AdvertiserService"
@@ -51,13 +46,14 @@
         <service
             android:name=".service_notification.AutoCheckService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
 
         <receiver android:name=".service_notification.BootCompletedIntentReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/darker_gray"
     android:backgroundTint="@android:color/transparent"
+    android:foreground="@android:color/transparent"
     tools:context="com.example.gszzz.attendclass.AttendanceChecking">
 
 
@@ -14,9 +15,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/Greeting"
         android:layout_centerHorizontal="true"
-        android:text="This is EE1001"
         android:textColor="@android:color/black"
-        android:textSize="25dp" />
+        android:textSize="25sp" />
 
     <TextView
         android:id="@+id/totalNumTextView"
@@ -24,9 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/moduleInfo"
         android:layout_centerHorizontal="true"
-        android:text="43/50"
         android:textColor="@android:color/holo_red_light"
-        android:textSize="35dp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/furtherInfo"
@@ -37,7 +36,7 @@
         android:onClick="enterNameList"
         android:text="see more"
         android:textColorHighlight="@android:color/holo_red_dark"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/Greeting"
@@ -48,7 +47,7 @@
         android:layout_marginTop="57dp"
         android:text="Hello Professor"
         android:textColor="@android:color/black"
-        android:textSize="25dp" />
+        android:textSize="25sp" />
 
     <TextView
         android:id="@+id/textView6"
@@ -56,7 +55,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/furtherInfo"
         android:layout_centerHorizontal="true"
-        android:text="Time"
         android:textColor="@android:color/holo_blue_light" />
 
     <ListView
@@ -65,6 +63,6 @@
         android:layout_height="280dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:background="@android:color/holo_orange_light" />
+        android:background="@android:color/holo_blue_bright" />
 
 </RelativeLayout>

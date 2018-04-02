@@ -60,7 +60,7 @@ public class AdvertiserService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         advertisingData = intent.getByteArrayExtra("bitmap");
-        powerLevel = intent.getIntExtra("power", 0);
+        powerLevel = intent.getIntExtra("power", 1);
 //        Toast.makeText(this, "Advertised data: " + advertisingData.toString(), Toast.LENGTH_SHORT).show();
         startAdvertising();
         return super.onStartCommand(intent, flags, startId);
