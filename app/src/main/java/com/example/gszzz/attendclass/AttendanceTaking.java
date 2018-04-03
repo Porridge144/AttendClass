@@ -161,10 +161,10 @@ public class AttendanceTaking extends AppCompatActivity{
 //        randomizeBitmaps();
 
         scanResults = new ArrayList<>();
-        IntentFilter filter = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
-        registerReceiver(scanResultsReceiver, filter);
-        filter = new IntentFilter("classDataReceived");
-        registerReceiver(classDataReceiver, filter);
+        IntentFilter filterA = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
+        registerReceiver(scanResultsReceiver, filterA);
+        IntentFilter filterB = new IntentFilter("classDataReceived");
+        registerReceiver(classDataReceiver, filterB);
 
         advertisingFailureReceiver = new BroadcastReceiver() {
             @Override

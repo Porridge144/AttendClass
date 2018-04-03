@@ -24,6 +24,8 @@ public class StudentTab extends Fragment implements OnClickListener {
     private Button stuLogin;
     private String username;
     public static String globalUsername = "";
+    protected static String[] nameList;
+    protected static String className;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,11 +40,14 @@ public class StudentTab extends Fragment implements OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+        IntentFilter filter = new IntentFilter("classDataReceived");
+        getActivity().registerReceiver(classDataReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        getActivity().unregisterReceiver(classDataReceiver);
     }
 
     @Override
@@ -50,13 +55,13 @@ public class StudentTab extends Fragment implements OnClickListener {
         switch (view.getId()) {
             case R.id.loginButton:
                 username = usernameText.getText().toString();
-                Log.i("class name: ", MainActivity.className);
-                if(MainActivity.className.equals("No Class For Now")) {
+                Log.i("class name: ", className);
+                if(className.equals("No Class For Now")) {
                     Toast.makeText(getActivity(), "No Class For Now", Toast.LENGTH_LONG).show();
                 }
                 else {
-                    for (int i = 1; !(MainActivity.matricNum == null) && i < MainActivity.matricNum.length; i++) {
-                        if (MainActivity.matricNum[i].equals(username)) {
+                    for (int i = 1; !(nameList == null) && i < nameList.length; i++) {
+                        if ((nameList[i].split(" ")[1]).equals(username)) {
                             globalUsername = username;
                             Intent intent = new Intent(getActivity(), AttendanceTaking.class);
                             startActivity(intent);
@@ -70,5 +75,21 @@ public class StudentTab extends Fragment implements OnClickListener {
                 break;
         }
     }
+
+    private final BroadcastReceiver classDataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("classDataReceived")) {
+                className = intent.getStringExtra("className");
+                nameList = intent.getStringArrayExtra("nameList");
+                if(className.equals("No Class For Now")){
+                    Toast.makeText(getActivity(),"No Class For Now", Toast.LENGTH_LONG).show();
+                } else {
+                    Log.i("class name: ", className);
+                    Toast.makeText(getActivity(),"Loading...", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    };
 }
 

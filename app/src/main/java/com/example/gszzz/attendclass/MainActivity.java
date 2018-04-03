@@ -24,20 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mAdapter;
     private ViewPager mViewPager;
-    protected static String[] nameList;
-    protected static String[] matricNum;
-    protected static String className;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
-        backgroundTaskRetrieveInfo.execute("query_class_list");
-
-        IntentFilter filter = new IntentFilter("classDataReceived");
-        registerReceiver(classDataReceiver, filter);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -49,19 +40,19 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
+        backgroundTaskRetrieveInfo.execute("query_class_list");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter("classDataReceived");
-        registerReceiver(classDataReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(classDataReceiver);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -99,23 +90,4 @@ public class MainActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
     }
-
-    private final BroadcastReceiver classDataReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("classDataReceived")) {
-                className = intent.getStringExtra("className");
-                nameList = intent.getStringArrayExtra("nameList");
-                if(className.equals("No Class For Now")){
-                    Toast.makeText(getApplicationContext(),"No Class For Now", Toast.LENGTH_LONG).show();
-                } else {
-                    for (int i = 1; i < nameList.length; i++) {
-                        // temp is the matric no being looped thru
-                        matricNum[i] = (nameList[i].split(" "))[1];
-                    }
-                    Toast.makeText(getApplicationContext(),"Loading...", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    };
 }
