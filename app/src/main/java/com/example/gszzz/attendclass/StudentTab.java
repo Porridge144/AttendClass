@@ -3,6 +3,7 @@ package com.example.gszzz.attendclass;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.util.Log;
@@ -23,9 +24,8 @@ public class StudentTab extends Fragment implements OnClickListener {
     private EditText usernameText;
     private Button stuLogin;
     private String username;
-    public static String globalUsername = "";
     protected static String[] nameList;
-    protected static String className;
+    protected static String className = "Null";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -37,11 +37,55 @@ public class StudentTab extends Fragment implements OnClickListener {
         return v;
     }
 
+    private void storeUsername(String username) {
+        SharedPreferences mspref = this.getActivity().getSharedPreferences("stuUsername", Context.MODE_PRIVATE);
+        SharedPreferences.Editor mEditor = mspref.edit();
+        mEditor.putString("username", username);
+        mEditor.apply();
+    }
+
+    private void storeNamelist(String[] namelist) {
+        SharedPreferences mspref = this.getActivity().getSharedPreferences("stuNamelist", Context.MODE_PRIVATE);
+        SharedPreferences.Editor mEditor = mspref.edit();
+        StringBuilder s = new StringBuilder();
+        for(int i=0;i< namelist.length;i++){
+            s.append(namelist[i]).append(",");
+        }
+        mEditor.putString("namelist", s.toString());
+        mEditor.apply();
+    }
+
+    private String getUsername() {
+        SharedPreferences mspref = this.getActivity().getSharedPreferences("stuUsername", Context.MODE_PRIVATE);
+        return mspref.getString("username", "");
+    }
+
+    private String getNamelist() {
+        SharedPreferences mspref = this.getActivity().getSharedPreferences("stuNamelist", Context.MODE_PRIVATE);
+        return mspref.getString("namelist", "none,");
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter("classDataReceived");
         getActivity().registerReceiver(classDataReceiver, filter);
+        // check the username stored in share preferences
+        if(!getUsername().equals("")) {
+            username = getUsername();
+            String[] s = getNamelist().split(",");
+            if(!s[0].equals("none")) {
+                for (int i = 1; i < s.length; i++) {
+                    if ((s[i].split(" ")[1]).equals(username)) {
+                        Intent intent = new Intent(getActivity(), AttendanceTaking.class);
+                        intent.putExtra("username", username);
+                        intent.putExtra("nameList", s);
+                        startActivity(intent);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -55,6 +99,8 @@ public class StudentTab extends Fragment implements OnClickListener {
         switch (view.getId()) {
             case R.id.loginButton:
                 username = usernameText.getText().toString();
+                // store the username into shared preferences
+                storeUsername(username);
                 Log.i("class name: ", className);
                 if(className.equals("No Class For Now")) {
                     Toast.makeText(getActivity(), "No Class For Now", Toast.LENGTH_LONG).show();
@@ -62,13 +108,13 @@ public class StudentTab extends Fragment implements OnClickListener {
                 else {
                     for (int i = 1; !(nameList == null) && i < nameList.length; i++) {
                         if ((nameList[i].split(" ")[1]).equals(username)) {
-                            globalUsername = username;
                             Intent intent = new Intent(getActivity(), AttendanceTaking.class);
+                            intent.putExtra("username", username);
+                            intent.putExtra("nameList", nameList);
                             startActivity(intent);
                             break;
                         }
                     }
-                    Toast.makeText(getActivity(), "You're in wrong class!", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:
@@ -88,6 +134,7 @@ public class StudentTab extends Fragment implements OnClickListener {
                     Log.i("class name: ", className);
                     Toast.makeText(getActivity(),"Loading...", Toast.LENGTH_LONG).show();
                 }
+                storeNamelist(nameList);
             }
         }
     };

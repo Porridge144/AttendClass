@@ -163,8 +163,8 @@ public class AttendanceTaking extends AppCompatActivity{
         scanResults = new ArrayList<>();
         IntentFilter filterA = new IntentFilter(ScannerService.NEW_DEVICE_FOUND);
         registerReceiver(scanResultsReceiver, filterA);
-        IntentFilter filterB = new IntentFilter("classDataReceived");
-        registerReceiver(classDataReceiver, filterB);
+//        IntentFilter filterB = new IntentFilter("authenticated");
+//        registerReceiver(authenticatedReceiver, filterB);
 
         advertisingFailureReceiver = new BroadcastReceiver() {
             @Override
@@ -242,9 +242,7 @@ public class AttendanceTaking extends AppCompatActivity{
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
                         checkBTPermissions();
-
-                        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
-                        backgroundTaskRetrieveInfo.execute("query_class_list");
+                        loadData(getIntent());
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -277,8 +275,7 @@ public class AttendanceTaking extends AppCompatActivity{
                     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
                         // Everything is supported and enabled...
                         checkBTPermissions();
-                        BackgroundTaskRetrieveInfo backgroundTaskRetrieveInfo = new BackgroundTaskRetrieveInfo(getApplicationContext());
-                        backgroundTaskRetrieveInfo.execute("query_class_list");
+                        loadData(getIntent());
                     } else {
 
                         // Bluetooth Advertisements are not supported.
@@ -294,6 +291,37 @@ public class AttendanceTaking extends AppCompatActivity{
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void loadData(Intent intent) {
+        String[] nameList = intent.getStringArrayExtra("nameList");
+        String username = intent.getStringExtra("username");
+        moduleInfoTextView.setText(String.format("Welcome to %s", nameList[0]));
+        for (int i=1;i<nameList.length;i++){
+            // temp is the matric no being looped thru
+            matricNum = (nameList[i].split(" "))[1];
+            if (username.equals(matricNum)){
+                myName = (nameList[i].split(" "))[0];
+                defaultTextView.setText(String.format("Hi %s (%s)", myName, matricNum));
+                // set the specific bit to 1
+                if(i<=Constants.MAX_NUMBER_OF_BITS-2)
+                    bitmap00.set(i+1);
+                else if(i<=2*(Constants.MAX_NUMBER_OF_BITS-2))
+                    bitmap01.set(i+1-(Constants.MAX_NUMBER_OF_BITS-2));
+                else if(i<=3*(Constants.MAX_NUMBER_OF_BITS-2))
+                    bitmap10.set(i+1-2*(Constants.MAX_NUMBER_OF_BITS-2));
+                else
+                    bitmap11.set(i+1-3*(Constants.MAX_NUMBER_OF_BITS-2));
+                break;
+            }
+        }
+        Log.i("00: ", bitmap00.toString());
+        Log.i("01: ", bitmap01.toString());
+        Log.i("10: ", bitmap10.toString());
+        Log.i("11: ", bitmap11.toString());
+
+        startTime = System.currentTimeMillis();
+        handler.post(runnableCode);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -554,42 +582,6 @@ public class AttendanceTaking extends AppCompatActivity{
                 } catch (Exception e) {
                     Toast.makeText(getApplicationContext(), "AttendanceTaking: " + e.toString(), Toast.LENGTH_SHORT).show();
                 }
-            }
-        }
-    };
-
-    private final BroadcastReceiver classDataReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("classDataReceived")){
-                String className = intent.getStringExtra("className");
-                String[] nameList = intent.getStringArrayExtra("nameList");
-                moduleInfoTextView.setText(String.format("Welcome to %s", className));
-                Log.i("length of nameList: ", Integer.toString(nameList.length));
-                for (int i=1;i<nameList.length;i++){
-                    // temp is the matric no being looped thru
-                    matricNum = (nameList[i].split(" "))[1];
-                    if (StudentTab.globalUsername.equals(matricNum)){
-                        myName = (nameList[i].split(" "))[0];
-                        defaultTextView.setText(String.format("Hi %s (%s)", myName, matricNum));
-                        // set the specific bit to 1
-                        if(i<=Constants.MAX_NUMBER_OF_BITS-2)
-                            bitmap00.set(i+1);
-                        else if(i<=2*(Constants.MAX_NUMBER_OF_BITS-2))
-                            bitmap01.set(i+1-(Constants.MAX_NUMBER_OF_BITS-2));
-                        else if(i<=3*(Constants.MAX_NUMBER_OF_BITS-2))
-                            bitmap10.set(i+1-2*(Constants.MAX_NUMBER_OF_BITS-2));
-                        else
-                            bitmap11.set(i+1-3*(Constants.MAX_NUMBER_OF_BITS-2));
-                        break;
-                    }
-                }
-                Log.i("00: ", bitmap00.toString());
-                Log.i("01: ", bitmap01.toString());
-                Log.i("10: ", bitmap10.toString());
-                Log.i("11: ", bitmap11.toString());
-                startTime = System.currentTimeMillis();
-                handler.post(runnableCode);
             }
         }
     };
