@@ -29,7 +29,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LecturerRegister" />
         <activity android:name=".AttendanceTaking" />
         <activity android:name=".AttendanceChecking" />
         <activity android:name=".TimetableManagement" />

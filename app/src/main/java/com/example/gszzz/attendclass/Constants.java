@@ -6,9 +6,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Constants {
 
-    public static final String CLASS_INFO_QUERY_URL = "http://121.7.122.74:8081/attendance/classinfo_query.php";
+//    public static final String CLASS_INFO_QUERY_URL = "http://121.7.122.74:8081/attendance/classinfo_query.php";
 
-//    public static final String CLASS_INFO_QUERY_URL = "http://172.17.175.56:8081/attendance/classinfo_query.php";
+    public static final String CLASS_INFO_QUERY_URL = "http://172.17.172.192:8081/attendance/classinfo_query.php";
 
 //    public static final String CLASS_INFO_QUERY_URL = "http://192.168.0.104:8081/attendance/classinfo_query.php";
 
@@ -20,7 +20,7 @@ public class Constants {
 
     static final int ADVERTISING_INTERVAL = 4; // time for advertising one bitmap
 
-    static final int SCANNING_INTERVAL = 4; // time for scanning
+    static final int SCANNING_INTERVAL = 10; // time for scanning
 
     static final int BIAS = ThreadLocalRandom.current().nextInt(0, ADVERTISING_INTERVAL*1000+1); // bias time added before starting to advertise
 

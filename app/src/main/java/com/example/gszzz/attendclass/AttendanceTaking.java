@@ -95,24 +95,24 @@ public class AttendanceTaking extends AppCompatActivity{
 //            Log.i(TAG, Integer.toString(mBluetoothAdapter.getLeMaximumAdvertisingDataLength()));
 
             // no difference in bitmap; can rest
-            if (restIndicator){
-                Log.i(TAG,"onTick scan");
-                if (AdvertiserService.running){
-                    stopAdvertising();
-                }
-                // if the scanner service is not running yet
-                if (!ScannerService.running){
-                    taskScan();
-                } else {
-                // if it is currently scanning & it has rest for more than 5 min
-                    if ( (millis-restStartTime)/1000 > 5 * 60 ){
-                        restIndicator = false;
-                        stopScanning();
-                    }
-                }
-            }
+//            if (restIndicator){
+//                Log.i(TAG,"onTick scan");
+//                if (AdvertiserService.running){
+//                    stopAdvertising();
+//                }
+//                // if the scanner service is not running yet
+//                if (!ScannerService.running){
+//                    taskScan();
+//                } else {
+//                // if it is currently scanning & it has rest for more than 5 min
+//                    if ( (millis-restStartTime)/1000 > 5 * 60 ){
+//                        restIndicator = false;
+//                        stopScanning();
+//                    }
+//                }
+//            }
             // there is difference in bitmap; need to advertise
-            else{
+//            else{
                 if (( secondsUntilFinish < Constants.PERIOD + range) & (secondsUntilFinish > Constants.PERIOD - range)) {
                     advertisePeriodEnd = false;
                     taskAdvertise(0);
@@ -132,7 +132,7 @@ public class AttendanceTaking extends AppCompatActivity{
 //                        randomizeBitmaps();
                     }
                 }
-            }
+//            }
         }
         @Override
         public void onFinish() {
@@ -516,7 +516,6 @@ public class AttendanceTaking extends AppCompatActivity{
                     relayedBitmap.clear();
                     temp.clear();
                     relayedBitmap.or(BitSet.valueOf(receivedData));
-
                     temp.or(relayedBitmap.get(2, Constants.MAX_NUMBER_OF_BITS));
 
                     // check the page number

@@ -20,7 +20,6 @@ public class LecturerTab extends Fragment implements OnClickListener {
     private EditText usernameText;
     private EditText passwordText;
     private Button lecLogin;
-    private Button lecRegis;
     private String username;
     private String password;
 
@@ -32,8 +31,6 @@ public class LecturerTab extends Fragment implements OnClickListener {
         passwordText = v.findViewById(R.id.passwordInput);
         lecLogin = v.findViewById(R.id.loginButton);
         lecLogin.setOnClickListener(this);
-        lecRegis = v.findViewById(R.id.regisButton);
-        lecRegis.setOnClickListener(this);
         return v;
     }
 
@@ -53,12 +50,12 @@ public class LecturerTab extends Fragment implements OnClickListener {
             case R.id.loginButton:
                 username = usernameText.getText().toString();
                 password = passwordText.getText().toString();
+                // Add below to enable the login function
+//                String method = "login";
+//                BackgroundTask1 backgroundTask1 = new BackgroundTask1(this);
+//                backgroundTask1.execute(method, username, password);
                 Intent i1 = new Intent(getActivity(), AttendanceChecking.class);
                 startActivity(i1);
-                break;
-            case R.id.regisButton:
-                Intent i2 = new Intent(getActivity(), LecturerRegister.class);
-                startActivity(i2);
                 break;
             default:
                 break;
